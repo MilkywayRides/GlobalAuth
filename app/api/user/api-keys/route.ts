@@ -57,7 +57,7 @@ export async function POST(req: Request) {
             name,
             key: keyValue,
             createdAt: new Date(),
-            lastUsedAt: null,
+            lastUsed: null,
             expiresAt: null,
         });
 

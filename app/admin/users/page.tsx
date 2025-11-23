@@ -43,7 +43,9 @@ export default function UsersPage() {
 
     const loadUsers = async () => {
         try {
-            const result = await authClient.admin.listUsers({});
+            const result = await authClient.admin.listUsers({
+            query: {}
+        });
             if (result.data) {
                 setUsers(result.data.users);
             }

@@ -20,8 +20,8 @@ export function QRLogin() {
   const [loading, setLoading] = useState(false);
   const [timeLeft, setTimeLeft] = useState(0);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
-  const intervalRef = useRef<NodeJS.Timeout>();
-  const eventSourceRef = useRef<EventSource>();
+  const intervalRef = useRef<NodeJS.Timeout | undefined>();
+  const eventSourceRef = useRef<EventSource | undefined>();
   const isConnectedRef = useRef(false);
   const router = useRouter();
 

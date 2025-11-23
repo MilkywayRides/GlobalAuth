@@ -42,7 +42,9 @@ export default function AdminPage() {
 
   const loadStats = async () => {
     try {
-      const result = await authClient.admin.listUsers({});
+      const result = await authClient.admin.listUsers({
+        query: {}
+      });
       if (result.data) {
         const users = result.data.users;
         setStats({
