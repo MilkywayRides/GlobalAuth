@@ -8,6 +8,7 @@ export const user = pgTable("user", {
   image: text("image"),
   createdAt: timestamp("createdAt").notNull(),
   updatedAt: timestamp("updatedAt").notNull(),
+  lastLoginMethod: text("lastLoginMethod"),
   // Admin plugin fields
   role: text("role").default("user"),
   banned: boolean("banned").default(false),

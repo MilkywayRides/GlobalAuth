@@ -21,7 +21,7 @@ export async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
 
   // Check emergency shutdown first
-  const shutdownResponse = checkEmergencyShutdown(request);
+  const shutdownResponse = await checkEmergencyShutdown(request);
   if (shutdownResponse) {
     return shutdownResponse;
   }

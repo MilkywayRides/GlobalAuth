@@ -36,6 +36,13 @@
       "when": 1763911132142,
       "tag": "0004_real_dazzler",
       "breakpoints": true
+    },
+    {
+      "idx": 5,
+      "version": "7",
+      "when": 1763914393864,
+      "tag": "0005_lean_lorna_dane",
+      "breakpoints": true
     }
   ]
 }

@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getShutdownState } from "@/lib/shutdown-state";
 
-export function checkEmergencyShutdown(request: NextRequest): NextResponse | null {
+export async function checkEmergencyShutdown(request: NextRequest): Promise<NextResponse | null> {
   const { pathname } = request.nextUrl;
 
   // Skip shutdown check for admin and shutdown endpoints
@@ -24,7 +24,7 @@ export function checkEmergencyShutdown(request: NextRequest): NextResponse | nul
     pathname.startsWith("/signup") ||
     pathname.startsWith("/oauth");
 
-  if (isAuthEndpoint && getShutdownState()) {
+  if (isAuthEndpoint && await getShutdownState()) {
     return NextResponse.json(
       { 
         error: "Service temporarily unavailable", 
