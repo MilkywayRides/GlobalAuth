@@ -1,5 +1,6 @@
 import { betterAuth } from "better-auth";
 import { drizzleAdapter } from "better-auth/adapters/drizzle";
+import { lastLoginMethod, admin } from "better-auth/plugins";
 import { db } from "./db";
 
 export const auth = betterAuth({
@@ -21,6 +22,16 @@ export const auth = betterAuth({
       scope: ["user:email", "read:user"],
     },
   },
+  plugins: [
+    lastLoginMethod({
+      storeInDatabase: true,
+    }),
+    admin({
+      defaultRole: "user",
+      adminRoles: ["admin"],
+      adminUserIds: ["your-user-id-here"], // Add your user ID here
+    }),
+  ],
   secret: process.env.BETTER_AUTH_SECRET as string,
   baseURL: process.env.BETTER_AUTH_URL || "http://localhost:3000",
 });
