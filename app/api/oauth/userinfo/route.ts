@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { db } from "@/lib/db";
-import { oauthAccessToken, user } from "@/lib/db/schema";
+import { oauthTokens, user } from "@/lib/db/schema";
 import { eq } from "drizzle-orm";
 
 export async function GET(req: Request) {
@@ -13,8 +13,8 @@ export async function GET(req: Request) {
 
     const [accessToken] = await db
         .select()
-        .from(oauthAccessToken)
-        .where(eq(oauthAccessToken.accessToken, token));
+        .from(oauthTokens)
+        .where(eq(oauthTokens.accessToken, token));
 
     if (!accessToken) {
         return NextResponse.json({ error: "invalid_token" }, { status: 401 });

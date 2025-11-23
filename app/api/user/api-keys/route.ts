@@ -1,6 +1,6 @@
 import { auth } from "@/lib/auth";
 import { db } from "@/lib/db";
-import { apiKey, apiKeyUsage } from "@/lib/db/schema";
+import { apiKeys, apiUsage } from "@/lib/db/schema";
 import { headers } from "next/headers";
 import { NextResponse } from "next/server";
 import { eq, and } from "drizzle-orm";
@@ -17,15 +17,15 @@ export async function GET() {
 
     const keys = await db
         .select({
-            id: apiKey.id,
-            name: apiKey.name,
-            key: apiKey.key,
-            createdAt: apiKey.createdAt,
-            lastUsedAt: apiKey.lastUsedAt,
-            expiresAt: apiKey.expiresAt,
+            id: apiKeys.id,
+            name: apiKeys.name,
+            key: apiKeys.key,
+            createdAt: apiKeys.createdAt,
+            lastUsed: apiKeys.lastUsed,
+            expiresAt: apiKeys.expiresAt,
         })
-        .from(apiKey)
-        .where(eq(apiKey.userId, session.user.id));
+        .from(apiKeys)
+        .where(eq(apiKeys.userId, session.user.id));
 
     return NextResponse.json({ keys });
 }
@@ -51,7 +51,7 @@ export async function POST(req: Request) {
     const keyId = crypto.randomUUID();
 
     try {
-        await db.insert(apiKey).values({
+        await db.insert(apiKeys).values({
             id: keyId,
             userId: session.user.id,
             name,
@@ -94,18 +94,18 @@ export async function DELETE(req: Request) {
     try {
         // Verify ownership and delete
         await db
-            .delete(apiKey)
+            .delete(apiKeys)
             .where(
                 and(
-                    eq(apiKey.id, keyId),
-                    eq(apiKey.userId, session.user.id)
+                    eq(apiKeys.id, keyId),
+                    eq(apiKeys.userId, session.user.id)
                 )
             );
 
         // Also delete usage data
         await db
-            .delete(apiKeyUsage)
-            .where(eq(apiKeyUsage.apiKeyId, keyId));
+            .delete(apiUsage)
+            .where(eq(apiUsage.keyId, keyId));
 
         return NextResponse.json({ success: true });
     } catch (error) {

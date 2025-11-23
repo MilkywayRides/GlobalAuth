@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { db } from "@/lib/db";
-import { apiKeyUsage } from "@/lib/db/schema";
+import { apiUsage } from "@/lib/db/schema";
 import { eq } from "drizzle-orm";
 
 export async function GET(req: Request) {
@@ -10,11 +10,13 @@ export async function GET(req: Request) {
     try {
         const usage = await db
             .select({
-                apiKeyId: apiKeyUsage.apiKeyId,
-                requestCount: apiKeyUsage.requestCount,
+                keyId: apiUsage.keyId,
+                endpoint: apiUsage.endpoint,
+                method: apiUsage.method,
+                statusCode: apiUsage.statusCode,
+                timestamp: apiUsage.timestamp,
             })
-            .from(apiKeyUsage)
-            .where(eq(apiKeyUsage.date, date));
+            .from(apiUsage);
 
         return NextResponse.json({ usage });
     } catch (error) {

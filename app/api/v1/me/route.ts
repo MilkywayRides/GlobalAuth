@@ -1,5 +1,5 @@
 import { db } from "@/lib/db";
-import { apiKey, apiKeyUsage, user } from "@/lib/db/schema";
+import { apiKeys, apiUsage, user } from "@/lib/db/schema";
 import { NextResponse } from "next/server";
 import { eq, and } from "drizzle-orm";
 import crypto from "crypto";
