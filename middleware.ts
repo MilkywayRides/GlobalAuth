@@ -1,189 +1,63 @@
-import { NextRequest, NextResponse } from "next/server";
-import { auth } from "@/lib/auth";
+import { NextRequest, NextResponse } from 'next/server';
+import { Ratelimit } from '@upstash/ratelimit';
+import { Redis } from '@upstash/redis';
 
-// Rate limiting store (in production, use Redis)
-const rateLimitStore = new Map<string, { count: number; resetTime: number }>();
+// Initialize rate limiter (only in production)
+const redis = process.env.NODE_ENV === 'production' && process.env.UPSTASH_REDIS_REST_URL
+  ? new Redis({
+      url: process.env.UPSTASH_REDIS_REST_URL!,
+      token: process.env.UPSTASH_REDIS_REST_TOKEN!,
+    })
+  : null;
 
-// Request logging queue for batch processing
-const requestQueue: Array<{
-  endpoint: string;
-  method: string;
-  statusCode: number;
-  responseTime: number;
-  ipAddress: string;
-  userAgent: string;
-  timestamp: Date;
-}> = [];
-
-function rateLimit(ip: string, limit: number = 100, windowMs: number = 60000): boolean {
-  const now = Date.now();
-  const key = ip;
-  const record = rateLimitStore.get(key);
-
-  if (!record || now > record.resetTime) {
-    rateLimitStore.set(key, { count: 1, resetTime: now + windowMs });
-    return true;
-  }
-
-  if (record.count >= limit) {
-    return false;
-  }
-
-  record.count++;
-  return true;
-}
-
-// Batch process request logs every 5 seconds
-if (typeof window === 'undefined') {
-  setInterval(async () => {
-    if (requestQueue.length > 0) {
-      const batch = requestQueue.splice(0, 100); // Process in batches of 100
-      try {
-        // In a real app, you'd batch insert to database here
-        console.log(`Processed ${batch.length} API requests`);
-      } catch (error) {
-        console.error('Failed to process request batch:', error);
-      }
-    }
-  }, 5000);
-}
+const ratelimit = redis ? new Ratelimit({
+  redis,
+  limiter: Ratelimit.slidingWindow(10, '10 s'),
+  analytics: true,
+}) : null;
 
 export async function middleware(request: NextRequest) {
-  const startTime = Date.now();
   const { pathname } = request.nextUrl;
-  const method = request.method;
-  const ipAddress = request.ip || request.headers.get('x-forwarded-for') || 'unknown';
-  const userAgent = request.headers.get('user-agent') || 'unknown';
 
+  // Rate limiting for API routes in production
+  if (pathname.startsWith('/api/') && ratelimit) {
+    const ip = request.ip ?? '127.0.0.1';
+    const { success, pending, limit, reset, remaining } = await ratelimit.limit(ip);
+
+    if (!success) {
+      return new NextResponse('Rate limit exceeded', {
+        status: 429,
+        headers: {
+          'X-RateLimit-Limit': limit.toString(),
+          'X-RateLimit-Remaining': remaining.toString(),
+          'X-RateLimit-Reset': new Date(reset).toISOString(),
+        },
+      });
+    }
+  }
+
+  // Security headers
   const response = NextResponse.next();
   
-  // Add security and performance headers
+  // CSP for production
+  if (process.env.NODE_ENV === 'production') {
+    response.headers.set(
+      'Content-Security-Policy',
+      "default-src 'self'; script-src 'self' 'unsafe-eval' 'unsafe-inline' https://va.vercel-scripts.com; style-src 'self' 'unsafe-inline'; img-src 'self' data: https:; font-src 'self' data:; connect-src 'self' https:; frame-ancestors 'none';"
+    );
+  }
+
+  // Additional security headers
   response.headers.set('X-DNS-Prefetch-Control', 'on');
-  response.headers.set('Strict-Transport-Security', 'max-age=31536000; includeSubDomains');
-  response.headers.set('X-XSS-Protection', '1; mode=block');
+  response.headers.set('X-Frame-Options', 'DENY');
   response.headers.set('X-Content-Type-Options', 'nosniff');
-  response.headers.set('Referrer-Policy', 'origin-when-cross-origin');
-  
-  // Development optimizations
-  if (process.env.NODE_ENV === 'development') {
-    response.headers.set('Cache-Control', 'no-cache, no-store, must-revalidate');
-    response.headers.set('X-Response-Time', `${Date.now() - startTime}ms`);
-    response.headers.set('X-Request-ID', crypto.randomUUID());
-  }
+  response.headers.set('Referrer-Policy', 'strict-origin-when-cross-origin');
 
-  // Skip middleware for static files and health checks
-  if (
-    pathname.startsWith('/_next') ||
-    pathname.startsWith('/api/health') ||
-    pathname.includes('.') ||
-    pathname === '/favicon.ico'
-  ) {
-    return response;
-  }
-
-  try {
-    // Rate limiting
-    if (!rateLimit(ipAddress)) {
-      const responseTime = Date.now() - startTime;
-      
-      // Log rate limited requests
-      requestQueue.push({
-        endpoint: pathname,
-        method,
-        statusCode: 429,
-        responseTime,
-        ipAddress,
-        userAgent,
-        timestamp: new Date(),
-      });
-      
-      return new NextResponse('Too Many Requests', { status: 429 });
-    }
-
-    const session = await auth.api.getSession({
-      headers: request.headers,
-    });
-
-    // Protect admin routes
-    if (pathname.startsWith("/admin")) {
-      if (!session?.user) {
-        const loginUrl = new URL("/login", request.url);
-        loginUrl.searchParams.set('redirect', pathname);
-        return NextResponse.redirect(loginUrl);
-      }
-
-      if (session.user.role !== "admin") {
-        return NextResponse.redirect(new URL("/dashboard", request.url));
-      }
-    }
-
-    // Protect dashboard routes
-    if (pathname.startsWith("/dashboard")) {
-      if (!session?.user) {
-        const loginUrl = new URL("/login", request.url);
-        loginUrl.searchParams.set('redirect', pathname);
-        return NextResponse.redirect(loginUrl);
-      }
-    }
-
-    // Redirect authenticated users from auth pages
-    if (session?.user && ['/login', '/signup'].includes(pathname)) {
-      if (session.user.role === "admin") {
-        return NextResponse.redirect(new URL("/admin", request.url));
-      } else {
-        return NextResponse.redirect(new URL("/dashboard", request.url));
-      }
-    }
-
-    // Redirect authenticated users from root to their respective dashboards
-    if (session?.user && pathname === "/") {
-      if (session.user.role === "admin") {
-        return NextResponse.redirect(new URL("/admin", request.url));
-      } else {
-        return NextResponse.redirect(new URL("/dashboard", request.url));
-      }
-    }
-
-    // Log all requests (queue for batch processing)
-    const responseTime = Date.now() - startTime;
-    requestQueue.push({
-      endpoint: pathname,
-      method,
-      statusCode: response.status || 200,
-      responseTime,
-      ipAddress,
-      userAgent,
-      timestamp: new Date(),
-    });
-
-    return response;
-  } catch (error) {
-    console.error("Middleware error:", error);
-    
-    const responseTime = Date.now() - startTime;
-    
-    // Log errors
-    requestQueue.push({
-      endpoint: pathname,
-      method,
-      statusCode: 500,
-      responseTime,
-      ipAddress,
-      userAgent,
-      timestamp: new Date(),
-    });
-    
-    // In case of auth error, redirect to login for protected routes
-    if (pathname.startsWith("/admin") || pathname.startsWith("/dashboard")) {
-      return NextResponse.redirect(new URL("/login", request.url));
-    }
-    
-    return response;
-  }
+  return response;
 }
 
 export const config = {
   matcher: [
-    '/((?!_next/static|_next/image|favicon.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)',
+    '/((?!_next/static|_next/image|favicon.ico).*)',
   ],
 };

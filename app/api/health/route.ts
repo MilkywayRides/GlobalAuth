@@ -1,28 +1,28 @@
-import { NextResponse } from 'next/server';
-import { db } from '@/lib/db/index';
+import { NextResponse } from "next/server";
+import { db } from "@/lib/db";
 
 export async function GET() {
   try {
     // Check database connection
-    await db.execute('SELECT 1');
+    await db.execute("SELECT 1");
     
-    return NextResponse.json({
-      status: 'healthy',
+    const health = {
+      status: "healthy",
       timestamp: new Date().toISOString(),
-      service: 'BlazeNeuro Developer Portal',
-      version: process.env.npm_package_version || '1.0.0',
-      database: 'connected',
+      version: process.env.npm_package_version || "1.0.0",
+      environment: process.env.NODE_ENV,
       uptime: process.uptime(),
-    });
+      memory: process.memoryUsage(),
+    };
+
+    return NextResponse.json(health, { status: 200 });
   } catch (error) {
-    return NextResponse.json(
-      {
-        status: 'unhealthy',
-        timestamp: new Date().toISOString(),
-        service: 'BlazeNeuro Developer Portal',
-        error: 'Database connection failed',
-      },
-      { status: 503 }
-    );
+    const health = {
+      status: "unhealthy",
+      timestamp: new Date().toISOString(),
+      error: error instanceof Error ? error.message : "Unknown error",
+    };
+
+    return NextResponse.json(health, { status: 503 });
   }
 }

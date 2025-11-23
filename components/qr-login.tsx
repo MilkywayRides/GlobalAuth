@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -22,45 +22,37 @@ export function QRLogin() {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const intervalRef = useRef<NodeJS.Timeout>();
   const eventSourceRef = useRef<EventSource>();
+  const isConnectedRef = useRef(false);
   const router = useRouter();
 
-  useEffect(() => {
-    checkAuth();
+  const cleanup = useCallback(() => {
+    if (intervalRef.current) {
+      clearInterval(intervalRef.current);
+      intervalRef.current = undefined;
+    }
+    if (eventSourceRef.current) {
+      eventSourceRef.current.close();
+      eventSourceRef.current = undefined;
+    }
+    isConnectedRef.current = false;
   }, []);
 
   useEffect(() => {
-    if (!isAuthenticated && !qrSession) {
-      generateQR();
-    }
-    return () => {
-      if (intervalRef.current) clearInterval(intervalRef.current);
-      if (eventSourceRef.current) eventSourceRef.current.close();
-    };
-  }, [isAuthenticated]);
+    checkAuth();
+    return cleanup;
+  }, [cleanup]);
 
   useEffect(() => {
-    if (qrSession && !isAuthenticated) {
-      // Update countdown timer
-      intervalRef.current = setInterval(() => {
-        const now = Date.now();
-        const remaining = Math.max(0, qrSession.expiresAt - now);
-        setTimeLeft(Math.ceil(remaining / 1000));
-        
-        if (remaining <= 0) {
-          setQrSession(prev => prev ? { ...prev, status: 'expired' } : null);
-          if (intervalRef.current) clearInterval(intervalRef.current);
-          if (eventSourceRef.current) eventSourceRef.current.close();
-        }
-      }, 1000);
+    if (!isAuthenticated && !qrSession && !loading) {
+      generateQR();
+    }
+  }, [isAuthenticated, qrSession, loading]);
 
-      // Start SSE connection for real-time updates
+  useEffect(() => {
+    if (qrSession && !isAuthenticated && !isConnectedRef.current) {
+      startCountdown();
       startSSE(qrSession.id);
     }
-
-    return () => {
-      if (intervalRef.current) clearInterval(intervalRef.current);
-      if (eventSourceRef.current) eventSourceRef.current.close();
-    };
   }, [qrSession, isAuthenticated]);
 
   const checkAuth = async () => {
@@ -73,8 +65,9 @@ export function QRLogin() {
   };
 
   const generateQR = async () => {
-    if (isAuthenticated) return;
+    if (isAuthenticated || loading) return;
     
+    cleanup();
     setLoading(true);
     try {
       const response = await fetch('/api/auth/qr/generate', {
@@ -92,12 +85,26 @@ export function QRLogin() {
     }
   };
 
+  const startCountdown = () => {
+    if (!qrSession || intervalRef.current) return;
+
+    intervalRef.current = setInterval(() => {
+      const now = Date.now();
+      const remaining = Math.max(0, qrSession.expiresAt - now);
+      setTimeLeft(Math.ceil(remaining / 1000));
+      
+      if (remaining <= 0) {
+        setQrSession(prev => prev ? { ...prev, status: 'expired' } : null);
+        cleanup();
+      }
+    }, 1000);
+  };
+
   const startSSE = (sessionId: string) => {
-    if (eventSourceRef.current) {
-      eventSourceRef.current.close();
-    }
+    if (isConnectedRef.current || !sessionId) return;
 
     try {
+      isConnectedRef.current = true;
       eventSourceRef.current = new EventSource(`/api/auth/qr/stream/${sessionId}`);
       
       eventSourceRef.current.onmessage = (event) => {
@@ -106,11 +113,13 @@ export function QRLogin() {
           setQrSession(prev => prev ? { ...prev, status: data.status } : null);
           
           if (data.status === 'confirmed') {
-            // Login successful - check auth and redirect
+            cleanup();
             setTimeout(async () => {
               await checkAuth();
               router.push('/dashboard');
             }, 1500);
+          } else if (['rejected', 'expired'].includes(data.status)) {
+            cleanup();
           }
         } catch (error) {
           console.error('Failed to parse SSE data:', error);
@@ -118,51 +127,14 @@ export function QRLogin() {
       };
 
       eventSourceRef.current.onerror = () => {
-        // Silently handle SSE errors and fallback to polling
-        eventSourceRef.current?.close();
-        if (qrSession?.status === 'pending' || qrSession?.status === 'scanned') {
-          startPolling();
-        }
+        cleanup();
       };
     } catch (error) {
       console.error('Failed to start SSE:', error);
-      startPolling();
+      isConnectedRef.current = false;
     }
   };
 
-  const startPolling = () => {
-    const pollInterval = setInterval(async () => {
-      if (!qrSession) {
-        clearInterval(pollInterval);
-        return;
-      }
-
-      try {
-        const response = await fetch(`/api/auth/qr/status/${qrSession.id}`);
-        if (response.ok) {
-          const data = await response.json();
-          setQrSession(prev => prev ? { ...prev, status: data.status } : null);
-          
-          if (data.status === 'confirmed') {
-            clearInterval(pollInterval);
-            setTimeout(async () => {
-              await checkAuth();
-              router.push('/dashboard');
-            }, 1500);
-          } else if (['rejected', 'expired'].includes(data.status)) {
-            clearInterval(pollInterval);
-          }
-        }
-      } catch (error) {
-        console.error('Polling error:', error);
-      }
-    }, 2000);
-
-    // Cleanup after 5 minutes
-    setTimeout(() => clearInterval(pollInterval), 5 * 60 * 1000);
-  };
-
-  // Demo functions to simulate mobile app actions
   const simulateAction = async (action: string) => {
     if (!qrSession) return;
     
@@ -229,7 +201,6 @@ export function QRLogin() {
     }
   };
 
-  // If user is already authenticated, show success state
   if (isAuthenticated) {
     return (
       <Card>
@@ -274,7 +245,6 @@ export function QRLogin() {
         </CardHeader>
         <CardContent className="space-y-4">
           <div className="flex flex-col items-center space-y-4">
-            {/* QR Code Display */}
             <div className="relative">
               {qrSession?.qrCode && qrSession.status !== 'expired' ? (
                 <div className="p-4 bg-white rounded-lg border-2 border-dashed border-gray-300">
@@ -300,7 +270,6 @@ export function QRLogin() {
               )}
             </div>
 
-            {/* Status Badge */}
             <Badge variant="secondary" className={statusInfo.color}>
               <div className="flex items-center gap-2">
                 {statusInfo.icon}
@@ -308,19 +277,16 @@ export function QRLogin() {
               </div>
             </Badge>
 
-            {/* Status Description */}
             <p className="text-sm text-muted-foreground text-center">
               {statusInfo.description}
             </p>
 
-            {/* Timer */}
             {qrSession && timeLeft > 0 && qrSession.status !== 'confirmed' && (
               <div className="text-xs text-muted-foreground">
                 Expires in {Math.floor(timeLeft / 60)}:{(timeLeft % 60).toString().padStart(2, '0')}
               </div>
             )}
 
-            {/* Refresh Button */}
             {(qrSession?.status === 'expired' || qrSession?.status === 'rejected' || !qrSession) && (
               <Button 
                 onClick={generateQR} 
@@ -336,7 +302,6 @@ export function QRLogin() {
         </CardContent>
       </Card>
 
-      {/* Demo Controls */}
       {qrSession && (qrSession.status === 'pending' || qrSession.status === 'scanned') && (
         <Card>
           <CardHeader>

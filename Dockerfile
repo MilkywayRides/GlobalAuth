@@ -1,4 +1,3 @@
-# BlazeNeuro Developer Portal - Production Dockerfile
 FROM node:18-alpine AS base
 
 # Install dependencies only when needed
@@ -8,7 +7,7 @@ WORKDIR /app
 
 # Install dependencies based on the preferred package manager
 COPY package.json package-lock.json* ./
-RUN npm ci --only=production
+RUN npm ci --only=production && npm cache clean --force
 
 # Rebuild the source code only when needed
 FROM base AS builder
@@ -16,8 +15,9 @@ WORKDIR /app
 COPY --from=deps /app/node_modules ./node_modules
 COPY . .
 
-# Generate Prisma client and build the app
-RUN npm run db:generate
+# Build the application
+ENV NEXT_TELEMETRY_DISABLED 1
+ENV NODE_ENV production
 RUN npm run build
 
 # Production image, copy all the files and run next
@@ -39,6 +39,10 @@ RUN chown nextjs:nodejs .next
 # Automatically leverage output traces to reduce image size
 COPY --from=builder --chown=nextjs:nodejs /app/.next/standalone ./
 COPY --from=builder --chown=nextjs:nodejs /app/.next/static ./.next/static
+
+# Copy migration scripts
+COPY --from=builder --chown=nextjs:nodejs /app/scripts ./scripts
+COPY --from=builder --chown=nextjs:nodejs /app/drizzle ./drizzle
 
 USER nextjs
 
