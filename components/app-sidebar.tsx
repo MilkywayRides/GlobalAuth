@@ -13,6 +13,8 @@ import {
 import { NavMain } from "@/components/nav-main"
 import { NavSecondary } from "@/components/nav-secondary"
 import { NavUser } from "@/components/nav-user"
+import { EmergencyShutdown } from "@/components/admin/emergency-shutdown"
+import { Button } from "@/components/ui/button"
 import {
   Sidebar,
   SidebarContent,
@@ -22,7 +24,7 @@ import {
   SidebarMenuButton,
   SidebarMenuItem,
 } from "@/components/ui/sidebar"
-import { Command } from "lucide-react"
+import { Command, Plus } from "lucide-react"
 import { appConfig } from "@/lib/app-config"
 
 export function AppSidebar({ user, ...props }: React.ComponentProps<typeof Sidebar> & { user?: any }) {
@@ -103,6 +105,17 @@ export function AppSidebar({ user, ...props }: React.ComponentProps<typeof Sideb
         </SidebarMenu>
       </SidebarHeader>
       <SidebarContent>
+        {isAdminSection && (
+          <div className="px-2 py-2 border-b">
+            <div className="flex items-center justify-between gap-2">
+              <Button size="sm" className="flex-1">
+                <Plus className="h-4 w-4 mr-2" />
+                Quick Create
+              </Button>
+              <EmergencyShutdown />
+            </div>
+          </div>
+        )}
         <NavMain items={navMain} />
         <NavSecondary items={navSecondary} className="mt-auto" />
       </SidebarContent>

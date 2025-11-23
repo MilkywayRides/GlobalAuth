@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { Ratelimit } from '@upstash/ratelimit';
 import { Redis } from '@upstash/redis';
+import { checkEmergencyShutdown } from '@/lib/emergency-shutdown';
 
 // Initialize rate limiter (only in production)
 const redis = process.env.NODE_ENV === 'production' && process.env.UPSTASH_REDIS_REST_URL
@@ -18,6 +19,12 @@ const ratelimit = redis ? new Ratelimit({
 
 export async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
+
+  // Check emergency shutdown first
+  const shutdownResponse = checkEmergencyShutdown(request);
+  if (shutdownResponse) {
+    return shutdownResponse;
+  }
 
   // Rate limiting for API routes in production
   if (pathname.startsWith('/api/') && ratelimit) {
