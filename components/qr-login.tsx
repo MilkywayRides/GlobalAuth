@@ -114,10 +114,9 @@ export function QRLogin() {
           
           if (data.status === 'confirmed') {
             cleanup();
-            setTimeout(async () => {
-              await checkAuth();
-              router.push('/dashboard');
-            }, 1500);
+            setTimeout(() => {
+              window.location.reload();
+            }, 1000);
           } else if (['rejected', 'expired'].includes(data.status)) {
             cleanup();
           }
