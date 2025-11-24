@@ -1,0 +1,86 @@
+[
+    {
+        "merged": "/home/ankit/.gradle/daemon/8.2/com.blazeneuro.developer.app-merged_res-58:/layout_activity_signup.xml.flat",
+        "source": "/home/ankit/.gradle/daemon/8.2/com.blazeneuro.developer.app-main-60:/layout/activity_signup.xml"
+    },
+    {
+        "merged": "/home/ankit/.gradle/daemon/8.2/com.blazeneuro.developer.app-merged_res-58:/layout_activity_login.xml.flat",
+        "source": "/home/ankit/.gradle/daemon/8.2/com.blazeneuro.developer.app-main-60:/layout/activity_login.xml"
+    },
+    {
+        "merged": "/home/ankit/.gradle/daemon/8.2/com.blazeneuro.developer.app-merged_res-58:/xml_data_extraction_rules.xml.flat",
+        "source": "/home/ankit/.gradle/daemon/8.2/com.blazeneuro.developer.app-main-60:/xml/data_extraction_rules.xml"
+    },
+    {
+        "merged": "/home/ankit/.gradle/daemon/8.2/com.blazeneuro.developer.app-merged_res-58:/mipmap-anydpi-v26_ic_launcher_round.xml.flat",
+        "source": "/home/ankit/.gradle/daemon/8.2/com.blazeneuro.developer.app-main-60:/mipmap-anydpi-v26/ic_launcher_round.xml"
+    },
+    {
+        "merged": "/home/ankit/.gradle/daemon/8.2/com.blazeneuro.developer.app-merged_res-58:/drawable_ic_qr_code.xml.flat",
+        "source": "/home/ankit/.gradle/daemon/8.2/com.blazeneuro.developer.app-main-60:/drawable/ic_qr_code.xml"
+    },
+    {
+        "merged": "/home/ankit/.gradle/daemon/8.2/com.blazeneuro.developer.app-merged_res-58:/layout_item_onboarding.xml.flat",
+        "source": "/home/ankit/.gradle/daemon/8.2/com.blazeneuro.developer.app-main-60:/layout/item_onboarding.xml"
+    },
+    {
+        "merged": "/home/ankit/.gradle/daemon/8.2/com.blazeneuro.developer.app-merged_res-58:/drawable_circle_background.xml.flat",
+        "source": "/home/ankit/.gradle/daemon/8.2/com.blazeneuro.developer.app-main-60:/drawable/circle_background.xml"
+    },
+    {
+        "merged": "/home/ankit/.gradle/daemon/8.2/com.blazeneuro.developer.app-merged_res-58:/layout_activity_main.xml.flat",
+        "source": "/home/ankit/.gradle/daemon/8.2/com.blazeneuro.developer.app-main-60:/layout/activity_main.xml"
+    },
+    {
+        "merged": "/home/ankit/.gradle/daemon/8.2/com.blazeneuro.developer.app-merged_res-58:/drawable_button_destructive.xml.flat",
+        "source": "/home/ankit/.gradle/daemon/8.2/com.blazeneuro.developer.app-main-60:/drawable/button_destructive.xml"
+    },
+    {
+        "merged": "/home/ankit/.gradle/daemon/8.2/com.blazeneuro.developer.app-merged_res-58:/drawable_button_primary.xml.flat",
+        "source": "/home/ankit/.gradle/daemon/8.2/com.blazeneuro.developer.app-main-60:/drawable/button_primary.xml"
+    },
+    {
+        "merged": "/home/ankit/.gradle/daemon/8.2/com.blazeneuro.developer.app-merged_res-58:/layout_activity_dashboard.xml.flat",
+        "source": "/home/ankit/.gradle/daemon/8.2/com.blazeneuro.developer.app-main-60:/layout/activity_dashboard.xml"
+    },
+    {
+        "merged": "/home/ankit/.gradle/daemon/8.2/com.blazeneuro.developer.app-merged_res-58:/drawable_button_secondary.xml.flat",
+        "source": "/home/ankit/.gradle/daemon/8.2/com.blazeneuro.developer.app-main-60:/drawable/button_secondary.xml"
+    },
+    {
+        "merged": "/home/ankit/.gradle/daemon/8.2/com.blazeneuro.developer.app-merged_res-58:/layout_activity_onboarding.xml.flat",
+        "source": "/home/ankit/.gradle/daemon/8.2/com.blazeneuro.developer.app-main-60:/layout/activity_onboarding.xml"
+    },
+    {
+        "merged": "com.blazeneuro.developer.app-merged_res-58:/layout_activity_onboarding.xml.flat",
+        "source": "com.blazeneuro.developer.app-main-60:/layout/activity_onboarding.xml"
+    },
+    {
+        "merged": "/home/ankit/.gradle/daemon/8.2/com.blazeneuro.developer.app-merged_res-58:/xml_backup_rules.xml.flat",
+        "source": "/home/ankit/.gradle/daemon/8.2/com.blazeneuro.developer.app-main-60:/xml/backup_rules.xml"
+    },
+    {
+        "merged": "/home/ankit/.gradle/daemon/8.2/com.blazeneuro.developer.app-merged_res-58:/mipmap-anydpi-v26_ic_launcher.xml.flat",
+        "source": "/home/ankit/.gradle/daemon/8.2/com.blazeneuro.developer.app-main-60:/mipmap-anydpi-v26/ic_launcher.xml"
+    },
+    {
+        "merged": "/home/ankit/.gradle/daemon/8.2/com.blazeneuro.developer.app-merged_res-58:/drawable_input_background.xml.flat",
+        "source": "/home/ankit/.gradle/daemon/8.2/com.blazeneuro.developer.app-main-60:/drawable/input_background.xml"
+    },
+    {
+        "merged": "/home/ankit/.gradle/daemon/8.2/com.blazeneuro.developer.app-merged_res-58:/layout_activity_qrscan.xml.flat",
+        "source": "/home/ankit/.gradle/daemon/8.2/com.blazeneuro.developer.app-main-60:/layout/activity_qrscan.xml"
+    },
+    {
+        "merged": "com.blazeneuro.developer.app-merged_res-58:/layout_activity_main.xml.flat",
+        "source": "com.blazeneuro.developer.app-main-60:/layout/activity_main.xml"
+    },
+    {
+        "merged": "/home/ankit/.gradle/daemon/8.2/com.blazeneuro.developer.app-merged_res-58:/drawable_ic_qr_code_large.xml.flat",
+        "source": "/home/ankit/.gradle/daemon/8.2/com.blazeneuro.developer.app-main-60:/drawable/ic_qr_code_large.xml"
+    },
+    {
+        "merged": "/home/ankit/.gradle/daemon/8.2/com.blazeneuro.developer.app-merged_res-58:/drawable_ic_camera.xml.flat",
+        "source": "/home/ankit/.gradle/daemon/8.2/com.blazeneuro.developer.app-main-60:/drawable/ic_camera.xml"
+    }
+]

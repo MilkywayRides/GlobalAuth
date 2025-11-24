@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="background">#09090B</color>
+    <color name="foreground">#FAFAFA</color>
+    <color name="card">#09090B</color>
+    <color name="card_foreground">#FAFAFA</color>
+    <color name="primary">#FAFAFA</color>
+    <color name="primary_foreground">#18181B</color>
+    <color name="secondary">#27272A</color>
+    <color name="secondary_foreground">#FAFAFA</color>
+    <color name="muted">#27272A</color>
+    <color name="muted_foreground">#A1A1AA</color>
+    <color name="accent">#27272A</color>
+    <color name="accent_foreground">#FAFAFA</color>
+    <color name="border">#27272A</color>
+    <color name="input">#27272A</color>
+    <color name="ring">#D4D4D8</color>
+</resources>

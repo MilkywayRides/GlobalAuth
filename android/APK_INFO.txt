@@ -1,0 +1,31 @@
+📱 BlazeNeuro Developer APK Information
+=====================================
+
+Package Name: com.blazeneuro.developer
+App Name: BlazeNeuro Developer
+Version: 1.0 (1)
+Min SDK: 24 (Android 7.0)
+Target SDK: 34 (Android 14)
+
+Features:
+✅ Email/Password Login
+✅ Account Registration  
+✅ QR Code Scanner
+✅ User Dashboard
+✅ Session Management
+✅ API Integration
+
+Build Requirements:
+- Java 8-17 (currently: 21)
+- Android SDK
+- Gradle 8.0
+
+APK Size (estimated): 8-12 MB
+
+To build:
+1. Install Android Studio
+2. Open this project folder
+3. Build → Build Bundle(s)/APK(s) → Build APK(s)
+4. APK location: app/build/outputs/apk/debug/app-debug.apk
+
+Alternative: Direct install via Android Studio (no APK file needed)

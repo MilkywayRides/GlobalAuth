@@ -1,0 +1,38 @@
+[
+    {
+        "merged": "/home/ankit/.gradle/daemon/8.2/com.blazeneuro.developer.app-mergeDebugResources-57:/layout/activity_onboarding.xml",
+        "source": "/home/ankit/.gradle/daemon/8.2/com.blazeneuro.developer.app-main-60:/layout/activity_onboarding.xml"
+    },
+    {
+        "merged": "/home/ankit/.gradle/daemon/8.2/com.blazeneuro.developer.app-mergeDebugResources-57:/layout/activity_main.xml",
+        "source": "/home/ankit/.gradle/daemon/8.2/com.blazeneuro.developer.app-main-60:/layout/activity_main.xml"
+    },
+    {
+        "merged": "com.blazeneuro.developer.app-mergeDebugResources-57:/layout/activity_onboarding.xml",
+        "source": "com.blazeneuro.developer.app-main-60:/layout/activity_onboarding.xml"
+    },
+    {
+        "merged": "/home/ankit/.gradle/daemon/8.2/com.blazeneuro.developer.app-mergeDebugResources-57:/layout/activity_login.xml",
+        "source": "/home/ankit/.gradle/daemon/8.2/com.blazeneuro.developer.app-main-60:/layout/activity_login.xml"
+    },
+    {
+        "merged": "/home/ankit/.gradle/daemon/8.2/com.blazeneuro.developer.app-mergeDebugResources-57:/layout/activity_qrscan.xml",
+        "source": "/home/ankit/.gradle/daemon/8.2/com.blazeneuro.developer.app-main-60:/layout/activity_qrscan.xml"
+    },
+    {
+        "merged": "/home/ankit/.gradle/daemon/8.2/com.blazeneuro.developer.app-mergeDebugResources-57:/layout/activity_dashboard.xml",
+        "source": "/home/ankit/.gradle/daemon/8.2/com.blazeneuro.developer.app-main-60:/layout/activity_dashboard.xml"
+    },
+    {
+        "merged": "/home/ankit/.gradle/daemon/8.2/com.blazeneuro.developer.app-mergeDebugResources-57:/layout/item_onboarding.xml",
+        "source": "/home/ankit/.gradle/daemon/8.2/com.blazeneuro.developer.app-main-60:/layout/item_onboarding.xml"
+    },
+    {
+        "merged": "/home/ankit/.gradle/daemon/8.2/com.blazeneuro.developer.app-mergeDebugResources-57:/layout/activity_signup.xml",
+        "source": "/home/ankit/.gradle/daemon/8.2/com.blazeneuro.developer.app-main-60:/layout/activity_signup.xml"
+    },
+    {
+        "merged": "com.blazeneuro.developer.app-mergeDebugResources-57:/layout/activity_main.xml",
+        "source": "com.blazeneuro.developer.app-main-60:/layout/activity_main.xml"
+    }
+]
