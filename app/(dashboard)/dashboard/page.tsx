@@ -1,6 +1,7 @@
 "use client"
 
 import { useState, useEffect } from "react"
+import { useRouter } from "next/navigation"
 import { AppSidebar } from "@/components/app-sidebar"
 import { ChartAreaInteractive } from "@/components/chart-area-interactive"
 import { DataTable } from "@/components/data-table"
@@ -32,6 +33,7 @@ import data from "@/components/dashboard-data.json"
 
 export default function DashboardPage() {
     const { data: session, isPending } = authClient.useSession()
+    const router = useRouter()
     const [apiStats, setApiStats] = useState({
         totalRequests: 0,
         successRate: 0,
@@ -42,6 +44,12 @@ export default function DashboardPage() {
     const [apiKeys, setApiKeys] = useState<any[]>([])
     const [topApiKeys, setTopApiKeys] = useState<any[]>([])
     const [isLoading, setIsLoading] = useState(true)
+
+    useEffect(() => {
+        if (!isPending && !session) {
+            router.push("/login")
+        }
+    }, [session, isPending, router])
 
     useEffect(() => {
         const fetchData = async () => {
@@ -82,8 +90,6 @@ export default function DashboardPage() {
 
         if (session) {
             fetchData()
-        } else if (!isPending) {
-            setIsLoading(false)
         }
     }, [session, isPending])
 
