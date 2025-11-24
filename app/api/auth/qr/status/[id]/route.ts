@@ -1,5 +1,7 @@
 import { NextResponse } from "next/server";
 import { qrSessions } from "@/lib/qr-sessions";
+import { auth } from "@/lib/auth";
+import { headers } from "next/headers";
 
 export async function GET(
   req: Request,
@@ -34,7 +36,6 @@ export async function GET(
   }
 }
 
-// Demo endpoint to simulate mobile app actions
 export async function POST(
   req: Request,
   { params }: { params: Promise<{ id: string }> }
@@ -42,7 +43,7 @@ export async function POST(
   try {
     const { id } = await params;
     const body = await req.json();
-    const { action } = body;
+    const { action, userId } = body;
     
     const session = qrSessions.get(id);
     
@@ -56,6 +57,10 @@ export async function POST(
         break;
       case 'confirm':
         session.status = 'confirmed';
+        // Store userId for web session creation
+        if (userId) {
+          session.userId = userId;
+        }
         break;
       case 'reject':
         session.status = 'rejected';
