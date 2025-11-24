@@ -1,9 +1,8 @@
 import { qrSessions } from "@/lib/qr-sessions";
 
-// Rate limiting
 const rateLimitMap = new Map<string, { count: number; resetTime: number }>();
-const RATE_LIMIT = 10; // requests per minute
-const WINDOW_MS = 60 * 1000; // 1 minute
+const RATE_LIMIT = 10;
+const WINDOW_MS = 60 * 1000;
 
 function checkRateLimit(ip: string): boolean {
   const now = Date.now();
@@ -41,11 +40,30 @@ export async function GET(
   const stream = new ReadableStream({
     start(controller) {
       const encoder = new TextEncoder();
+      let isClosed = false;
+      let interval: NodeJS.Timeout | null = null;
+      
+      const cleanup = () => {
+        if (interval) {
+          clearInterval(interval);
+          interval = null;
+        }
+        if (!isClosed) {
+          isClosed = true;
+          try {
+            controller.close();
+          } catch (e) {
+            // Already closed
+          }
+        }
+      };
       
       const sendUpdate = () => {
+        if (isClosed) return;
+        
         const currentSession = qrSessions.get(id);
         if (!currentSession) {
-          controller.close();
+          cleanup();
           return;
         }
 
@@ -59,20 +77,22 @@ export async function GET(
           expiresAt: currentSession.expiresAt,
         });
 
-        controller.enqueue(encoder.encode(`data: ${data}\n\n`));
+        try {
+          controller.enqueue(encoder.encode(`data: ${data}\n\n`));
+        } catch (e) {
+          cleanup();
+          return;
+        }
 
         if (['confirmed', 'rejected', 'expired'].includes(currentSession.status)) {
-          controller.close();
+          cleanup();
         }
       };
 
       sendUpdate();
-      const interval = setInterval(sendUpdate, 5000); // Increased to 5 seconds
+      interval = setInterval(sendUpdate, 5000);
 
-      req.signal.addEventListener('abort', () => {
-        clearInterval(interval);
-        controller.close();
-      });
+      req.signal.addEventListener('abort', cleanup);
     },
   });
 
