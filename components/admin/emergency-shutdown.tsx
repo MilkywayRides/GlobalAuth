@@ -125,7 +125,7 @@ export function EmergencyShutdown() {
             <AlertDialogCancel>Cancel</AlertDialogCancel>
             <AlertDialogAction
               onClick={confirmShutdown}
-              variant={pendingState ? "destructive" : "default"}
+              className={pendingState ? "bg-destructive text-destructive-foreground hover:bg-destructive/90" : ""}
             >
               {pendingState ? "Shutdown Now" : "Restore Services"}
             </AlertDialogAction>

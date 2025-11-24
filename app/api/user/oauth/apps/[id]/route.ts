@@ -19,8 +19,6 @@ export async function DELETE(
     }
 
     try {
-        const { id } = params;
-
         if (!id) {
             return NextResponse.json({ error: "Application ID is required" }, { status: 400 });
         }

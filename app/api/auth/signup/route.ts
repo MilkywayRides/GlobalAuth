@@ -26,9 +26,9 @@ export async function POST(req: Request) {
           id: result.user.id,
           name: result.user.name,
           email: result.user.email,
-          role: result.user.role || 'user'
+          role: (result.user as any).role || 'user'
         },
-        token: result.session?.token || 'mock_token'
+        token: (result as any).session?.token || 'mock_token'
       });
     } else {
       return NextResponse.json(

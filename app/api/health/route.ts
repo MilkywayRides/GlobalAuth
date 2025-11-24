@@ -8,7 +8,7 @@ export async function GET() {
     await db.execute("SELECT 1");
     
     // Check emergency shutdown status
-    const isShutdown = getShutdownState();
+    const isShutdown = await getShutdownState();
     
     const health = {
       status: isShutdown ? "unhealthy" : "healthy",

@@ -32,7 +32,7 @@ import {
 
 export const description = "An interactive area chart"
 
-const chartData = [
+const fallbackData = [
   { date: "2024-04-01", desktop: 222, mobile: 150 },
   { date: "2024-04-02", desktop: 97, mobile: 180 },
   { date: "2024-04-03", desktop: 167, mobile: 120 },
@@ -127,15 +127,15 @@ const chartData = [
 ]
 
 const chartConfig = {
-  visitors: {
-    label: "Visitors",
+  requests: {
+    label: "API Requests",
   },
   desktop: {
-    label: "Desktop",
+    label: "Requests",
     color: "var(--primary)",
   },
   mobile: {
-    label: "Mobile",
+    label: "Requests",
     color: "var(--primary)",
   },
 } satisfies ChartConfig
@@ -143,6 +143,39 @@ const chartConfig = {
 export function ChartAreaInteractive() {
   const isMobile = useIsMobile()
   const [timeRange, setTimeRange] = React.useState("90d")
+  const [chartData, setChartData] = React.useState<any[]>([])
+  const [isLoading, setIsLoading] = React.useState(true)
+
+  React.useEffect(() => {
+    const fetchData = async () => {
+      try {
+        setIsLoading(true)
+        const period = timeRange === "90d" ? "90d" : timeRange === "30d" ? "30d" : "7d"
+        const response = await fetch(`/api/analytics?period=${period}`)
+        if (response.ok) {
+          const data = await response.json()
+          if (data.dailyUsage && data.dailyUsage.length > 0) {
+            const formattedData = data.dailyUsage.map((day: any) => ({
+              date: day.date,
+              desktop: day.requests,
+              mobile: 0
+            }))
+            setChartData(formattedData)
+          } else {
+            // No data, show empty chart
+            setChartData([])
+          }
+        }
+      } catch (error) {
+        console.error('Failed to fetch chart data:', error)
+        setChartData([])
+      } finally {
+        setIsLoading(false)
+      }
+    }
+
+    fetchData()
+  }, [timeRange])
 
   React.useEffect(() => {
     if (isMobile) {
@@ -150,29 +183,17 @@ export function ChartAreaInteractive() {
     }
   }, [isMobile])
 
-  const filteredData = chartData.filter((item) => {
-    const date = new Date(item.date)
-    const referenceDate = new Date("2024-06-30")
-    let daysToSubtract = 90
-    if (timeRange === "30d") {
-      daysToSubtract = 30
-    } else if (timeRange === "7d") {
-      daysToSubtract = 7
-    }
-    const startDate = new Date(referenceDate)
-    startDate.setDate(startDate.getDate() - daysToSubtract)
-    return date >= startDate
-  })
+  const filteredData = chartData
 
   return (
     <Card className="@container/card">
       <CardHeader>
-        <CardTitle>Total Visitors</CardTitle>
+        <CardTitle>Total API Requests</CardTitle>
         <CardDescription>
           <span className="hidden @[540px]/card:block">
-            Total for the last 3 months
+            {isLoading ? "Loading..." : `Total for the last ${timeRange === "90d" ? "3 months" : timeRange === "30d" ? "30 days" : "7 days"}`}
           </span>
-          <span className="@[540px]/card:hidden">Last 3 months</span>
+          <span className="@[540px]/card:hidden">{isLoading ? "Loading..." : timeRange === "90d" ? "Last 3 months" : timeRange === "30d" ? "Last 30 days" : "Last 7 days"}</span>
         </CardDescription>
         <CardAction>
           <ToggleGroup
@@ -209,11 +230,20 @@ export function ChartAreaInteractive() {
         </CardAction>
       </CardHeader>
       <CardContent className="px-2 pt-4 sm:px-6 sm:pt-6">
-        <ChartContainer
-          config={chartConfig}
-          className="aspect-auto h-[250px] w-full"
-        >
-          <AreaChart data={filteredData}>
+        {isLoading ? (
+          <div className="flex h-[250px] items-center justify-center">
+            <p className="text-sm text-muted-foreground">Loading chart data...</p>
+          </div>
+        ) : filteredData.length === 0 ? (
+          <div className="flex h-[250px] items-center justify-center">
+            <p className="text-sm text-muted-foreground">No API request data available</p>
+          </div>
+        ) : (
+          <ChartContainer
+            config={chartConfig}
+            className="aspect-auto h-[250px] w-full"
+          >
+            <AreaChart data={filteredData}>
             <defs>
               <linearGradient id="fillDesktop" x1="0" y1="0" x2="0" y2="1">
                 <stop
@@ -285,6 +315,7 @@ export function ChartAreaInteractive() {
             />
           </AreaChart>
         </ChartContainer>
+        )}
       </CardContent>
     </Card>
   )

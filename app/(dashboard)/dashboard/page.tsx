@@ -38,33 +38,50 @@ export default function DashboardPage() {
         avgResponseTime: 0,
         activeKeys: 0
     })
+    const [analyticsData, setAnalyticsData] = useState<any>(null)
+    const [apiKeys, setApiKeys] = useState<any[]>([])
+    const [topApiKeys, setTopApiKeys] = useState<any[]>([])
     const [isLoading, setIsLoading] = useState(true)
 
     useEffect(() => {
-        // Fetch API statistics
-        const fetchStats = async () => {
+        const fetchData = async () => {
             try {
-                const response = await fetch('/api/analytics')
-                if (response.ok) {
-                    const data = await response.json()
+                const [analyticsRes, keysRes] = await Promise.all([
+                    fetch('/api/analytics'),
+                    fetch('/api/keys')
+                ])
+
+                if (analyticsRes.ok) {
+                    const analytics = await analyticsRes.json()
+                    setAnalyticsData(analytics)
+                    setTopApiKeys(analytics.topApiKeys || [])
                     setApiStats({
-                        totalRequests: data.totalRequests || 0,
-                        successRate: data.totalRequests > 0 
-                            ? Math.round((data.successfulRequests / data.totalRequests) * 100)
+                        totalRequests: analytics.totalRequests || 0,
+                        successRate: analytics.totalRequests > 0 
+                            ? Math.round((analytics.successfulRequests / analytics.totalRequests) * 100)
                             : 100,
-                        avgResponseTime: 145, // Mock data
-                        activeKeys: 2 // Mock data
+                        avgResponseTime: analytics.totalRequests > 0 ? 145 : 0,
+                        activeKeys: 0
                     })
                 }
+
+                if (keysRes.ok) {
+                    const keysData = await keysRes.json()
+                    setApiKeys(keysData.keys || [])
+                    setApiStats(prev => ({
+                        ...prev,
+                        activeKeys: keysData.keys?.filter((k: any) => k.isActive).length || 0
+                    }))
+                }
             } catch (error) {
-                console.error('Failed to fetch API stats:', error)
+                console.error('Failed to fetch data:', error)
             } finally {
                 setIsLoading(false)
             }
         }
 
         if (session) {
-            fetchStats()
+            fetchData()
         } else if (!isPending) {
             setIsLoading(false)
         }
@@ -123,8 +140,14 @@ export default function DashboardPage() {
                                         <CardContent>
                                             <div className="text-2xl font-bold">{apiStats.totalRequests.toLocaleString()}</div>
                                             <p className="text-xs text-muted-foreground">
-                                                <TrendingUp className="inline h-3 w-3 mr-1" />
-                                                +12% from last month
+                                                {apiStats.totalRequests > 0 ? (
+                                                    <>
+                                                        <TrendingUp className="inline h-3 w-3 mr-1" />
+                                                        Total requests tracked
+                                                    </>
+                                                ) : (
+                                                    "No requests yet"
+                                                )}
                                             </p>
                                         </CardContent>
                                     </Card>
@@ -139,8 +162,14 @@ export default function DashboardPage() {
                                         <CardContent>
                                             <div className="text-2xl font-bold">{apiStats.successRate}%</div>
                                             <p className="text-xs text-muted-foreground">
-                                                <Activity className="inline h-3 w-3 mr-1" />
-                                                Excellent performance
+                                                {apiStats.totalRequests > 0 ? (
+                                                    <>
+                                                        <Activity className="inline h-3 w-3 mr-1" />
+                                                        {apiStats.successRate >= 95 ? "Excellent" : apiStats.successRate >= 80 ? "Good" : "Needs attention"}
+                                                    </>
+                                                ) : (
+                                                    "No data yet"
+                                                )}
                                             </p>
                                         </CardContent>
                                     </Card>
@@ -156,7 +185,7 @@ export default function DashboardPage() {
                                             <div className="text-2xl font-bold">{apiStats.avgResponseTime}ms</div>
                                             <p className="text-xs text-muted-foreground">
                                                 <Clock className="inline h-3 w-3 mr-1" />
-                                                -5ms from yesterday
+                                                {apiStats.avgResponseTime > 0 ? "Average response" : "No data"}
                                             </p>
                                         </CardContent>
                                     </Card>
@@ -172,7 +201,7 @@ export default function DashboardPage() {
                                             <div className="text-2xl font-bold">{apiStats.activeKeys}</div>
                                             <p className="text-xs text-muted-foreground">
                                                 <Users className="inline h-3 w-3 mr-1" />
-                                                All keys active
+                                                {apiStats.activeKeys > 0 ? `${apiStats.activeKeys} active` : "No keys yet"}
                                             </p>
                                         </CardContent>
                                     </Card>
@@ -199,40 +228,79 @@ export default function DashboardPage() {
                                         <div className="grid gap-4 md:grid-cols-2">
                                             <Card>
                                                 <CardHeader>
-                                                    <CardTitle>Request Volume</CardTitle>
+                                                    <CardTitle>Top 3 API Keys</CardTitle>
                                                     <CardDescription>
-                                                        API requests over the last 30 days
+                                                        Most used API keys by request count
                                                     </CardDescription>
                                                 </CardHeader>
                                                 <CardContent>
-                                                    <ChartAreaInteractive />
+                                                    {topApiKeys.length > 0 ? (
+                                                        <div className="space-y-3">
+                                                            {topApiKeys.map((key: any, idx: number) => (
+                                                                <div key={idx} className="flex items-center justify-between">
+                                                                    <div className="flex items-center gap-2">
+                                                                        <Badge variant="outline">{idx + 1}</Badge>
+                                                                        <span className="text-sm font-medium">{key.name}</span>
+                                                                    </div>
+                                                                    <Badge variant="secondary">{key.requests} requests</Badge>
+                                                                </div>
+                                                            ))}
+                                                        </div>
+                                                    ) : (
+                                                        <p className="text-sm text-muted-foreground">No API key usage data available</p>
+                                                    )}
                                                 </CardContent>
                                             </Card>
                                             <Card>
                                                 <CardHeader>
-                                                    <CardTitle>Top Endpoints</CardTitle>
+                                                    <CardTitle>Request Volume</CardTitle>
                                                     <CardDescription>
-                                                        Most frequently used API endpoints
+                                                        API requests over the last 7 days
                                                     </CardDescription>
                                                 </CardHeader>
                                                 <CardContent>
-                                                    <div className="space-y-3">
-                                                        <div className="flex items-center justify-between">
-                                                            <span className="text-sm font-medium">/api/neural/predict</span>
-                                                            <Badge variant="secondary">1,234 calls</Badge>
+                                                    {analyticsData?.dailyUsage?.length > 0 ? (
+                                                        <div className="space-y-2">
+                                                            {analyticsData.dailyUsage.map((day: any) => (
+                                                                <div key={day.date} className="flex items-center justify-between">
+                                                                    <span className="text-sm">{new Date(day.date).toLocaleDateString()}</span>
+                                                                    <div className="flex items-center gap-2">
+                                                                        <Badge variant="outline">{day.requests} requests</Badge>
+                                                                        {day.errors > 0 && (
+                                                                            <Badge variant="destructive">{day.errors} errors</Badge>
+                                                                        )}
+                                                                    </div>
+                                                                </div>
+                                                            ))}
                                                         </div>
-                                                        <div className="flex items-center justify-between">
-                                                            <span className="text-sm font-medium">/api/auth/session</span>
-                                                            <Badge variant="secondary">856 calls</Badge>
-                                                        </div>
-                                                        <div className="flex items-center justify-between">
-                                                            <span className="text-sm font-medium">/api/models/list</span>
-                                                            <Badge variant="secondary">432 calls</Badge>
-                                                        </div>
-                                                    </div>
+                                                    ) : (
+                                                        <p className="text-sm text-muted-foreground">No data available</p>
+                                                    )}
                                                 </CardContent>
                                             </Card>
                                         </div>
+                                        <Card>
+                                            <CardHeader>
+                                                <CardTitle>Top Endpoints</CardTitle>
+                                                <CardDescription>
+                                                    Most frequently used API endpoints
+                                                </CardDescription>
+                                            </CardHeader>
+                                            <CardContent>
+                                                {analyticsData?.topEndpoints?.length > 0 ? (
+                                                    <div className="grid gap-3 md:grid-cols-2">
+                                                        {analyticsData.topEndpoints.map((endpoint: any, idx: number) => (
+                                                            <div key={idx} className="flex items-center justify-between">
+                                                                <span className="text-sm font-medium">{endpoint.endpoint}</span>
+                                                                <Badge variant="secondary">{endpoint.requests} calls</Badge>
+                                                            </div>
+                                                        ))}
+                                                    </div>
+                                                ) : (
+                                                    <p className="text-sm text-muted-foreground">No endpoint data available</p>
+                                                )}
+                                            </CardContent>
+                                        </Card>
                                     </TabsContent>
 
                                     <TabsContent value="api-keys" className="space-y-4">
@@ -252,13 +320,47 @@ export default function DashboardPage() {
                                                 </div>
                                             </CardHeader>
                                             <CardContent>
-                                                <div className="text-center py-8">
-                                                    <Key className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
-                                                    <h3 className="text-lg font-semibold mb-2">API Keys Component</h3>
-                                                    <p className="text-muted-foreground">
-                                                        API Keys management component will be loaded here.
-                                                    </p>
-                                                </div>
+                                                {apiKeys.length > 0 ? (
+                                                    <div className="space-y-4">
+                                                        {apiKeys.map((key) => (
+                                                            <div key={key.id} className="flex items-center justify-between p-4 border rounded-lg">
+                                                                <div className="space-y-1">
+                                                                    <div className="flex items-center gap-2">
+                                                                        <h4 className="font-semibold">{key.name}</h4>
+                                                                        <Badge variant={key.isActive ? "default" : "secondary"}>
+                                                                            {key.isActive ? "Active" : "Inactive"}
+                                                                        </Badge>
+                                                                    </div>
+                                                                    <p className="text-sm text-muted-foreground">
+                                                                        Created: {new Date(key.createdAt).toLocaleDateString()}
+                                                                    </p>
+                                                                    {key.lastUsed && (
+                                                                        <p className="text-sm text-muted-foreground">
+                                                                            Last used: {new Date(key.lastUsed).toLocaleDateString()}
+                                                                        </p>
+                                                                    )}
+                                                                </div>
+                                                                <div className="flex items-center gap-2">
+                                                                    <code className="text-xs bg-muted px-2 py-1 rounded">
+                                                                        {key.key.substring(0, 12)}...
+                                                                    </code>
+                                                                </div>
+                                                            </div>
+                                                        ))}
+                                                    </div>
+                                                ) : (
+                                                    <div className="text-center py-8">
+                                                        <Key className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
+                                                        <h3 className="text-lg font-semibold mb-2">No API Keys Yet</h3>
+                                                        <p className="text-muted-foreground mb-4">
+                                                            Create your first API key to start using BlazeNeuro services.
+                                                        </p>
+                                                        <Button>
+                                                            <Key className="h-4 w-4 mr-2" />
+                                                            Create Your First Key
+                                                        </Button>
+                                                    </div>
+                                                )}
                                             </CardContent>
                                         </Card>
                                     </TabsContent>

@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { auth } from '@/lib/auth';
 import { db } from '@/lib/db/index';
 import { apiUsage, apiKeys } from '@/lib/db/schema';
-import { eq, and, gte, sql } from 'drizzle-orm';
+import { eq, and, gte, sql, desc } from 'drizzle-orm';
 
 export async function GET(request: NextRequest) {
   try {
@@ -19,12 +19,12 @@ export async function GET(request: NextRequest) {
     
     // Calculate date range
     const now = new Date();
-    const daysBack = period === '30d' ? 30 : period === '7d' ? 7 : 1;
+    const daysBack = period === '90d' ? 90 : period === '30d' ? 30 : period === '7d' ? 7 : 1;
     const startDate = new Date(now.getTime() - (daysBack * 24 * 60 * 60 * 1000));
 
     // Get user's API keys
     const userKeys = await db
-      .select({ id: apiKeys.id })
+      .select({ id: apiKeys.id, name: apiKeys.name })
       .from(apiKeys)
       .where(eq(apiKeys.userId, session.user.id));
 
@@ -37,6 +37,7 @@ export async function GET(request: NextRequest) {
         errorRequests: 0,
         dailyUsage: [],
         topEndpoints: [],
+        topApiKeys: [],
       });
     }
 
@@ -74,6 +75,32 @@ export async function GET(request: NextRequest) {
       .orderBy(sql`COUNT(*) DESC`)
       .limit(10);
 
+    // Get top 3 API keys by usage
+    const topApiKeys = await db
+      .select({
+        keyId: apiUsage.keyId,
+        requests: sql<number>`COUNT(*)`,
+      })
+      .from(apiUsage)
+      .where(
+        and(
+          sql`${apiUsage.keyId} IN ${keyIds}`,
+          gte(apiUsage.timestamp, startDate)
+        )
+      )
+      .groupBy(apiUsage.keyId)
+      .orderBy(desc(sql`COUNT(*)`))
+      .limit(3);
+
+    // Map key IDs to names
+    const topKeysWithNames = topApiKeys.map(tk => {
+      const key = userKeys.find(k => k.id === tk.keyId);
+      return {
+        name: key?.name || 'Unknown',
+        requests: tk.requests,
+      };
+    });
+
     // Calculate totals
     const totalRequests = usageStats.reduce((sum, day) => sum + day.requests, 0);
     const errorRequests = usageStats.reduce((sum, day) => sum + day.errors, 0);
@@ -85,6 +112,7 @@ export async function GET(request: NextRequest) {
       errorRequests,
       dailyUsage: usageStats,
       topEndpoints,
+      topApiKeys: topKeysWithNames,
     });
   } catch (error) {
     console.error('Error fetching analytics:', error);
