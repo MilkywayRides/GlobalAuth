@@ -46,6 +46,25 @@ export async function middleware(request: NextRequest) {
   // Security headers
   const response = NextResponse.next();
   
+  // CORS headers for mobile app
+  if (pathname.startsWith('/api/auth/')) {
+    response.headers.set('Access-Control-Allow-Origin', '*');
+    response.headers.set('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
+    response.headers.set('Access-Control-Allow-Headers', 'Content-Type, Authorization');
+  }
+  
+  // Handle preflight requests
+  if (request.method === 'OPTIONS') {
+    return new NextResponse(null, {
+      status: 200,
+      headers: {
+        'Access-Control-Allow-Origin': '*',
+        'Access-Control-Allow-Methods': 'GET, POST, PUT, DELETE, OPTIONS',
+        'Access-Control-Allow-Headers': 'Content-Type, Authorization',
+      },
+    });
+  }
+  
   // CSP for production
   if (process.env.NODE_ENV === 'production') {
     response.headers.set(

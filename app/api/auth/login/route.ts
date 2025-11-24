@@ -28,7 +28,7 @@ export async function POST(req: Request) {
           email: result.user.email,
           role: (result.user as any).role || 'user'
         },
-        token: (result as any).session?.token || 'mock_token'
+        token: (result as any).session?.token || (result as any).token || 'session_token'
       });
     } else {
       return NextResponse.json(
@@ -36,10 +36,14 @@ export async function POST(req: Request) {
         { status: 401 }
       );
     }
-  } catch (error) {
+  } catch (error: any) {
     console.error("Login error:", error);
     return NextResponse.json(
-      { success: false, message: "Login failed" },
+      { 
+        success: false, 
+        message: error.message || "Login failed",
+        error: process.env.NODE_ENV === 'development' ? error.toString() : undefined
+      },
       { status: 500 }
     );
   }
