@@ -30,6 +30,10 @@ const nextConfig = {
           {
             key: 'Strict-Transport-Security',
             value: 'max-age=31536000; includeSubDomains'
+          },
+          {
+            key: 'Content-Security-Policy',
+            value: "connect-src 'self' https://developer.blazeneuro.com"
           }
         ]
       }
