@@ -19,6 +19,8 @@ export async function POST(req: Request) {
     };
 
     qrSessions.set(sessionId, session);
+    
+    console.log('[QR Generate] Created session:', sessionId, 'Total sessions:', qrSessions.size);
 
     // Create QR data for mobile app
     const qrData = {

@@ -28,14 +28,28 @@ export async function GET(
   const { id } = await params;
   const ip = req.headers.get('x-forwarded-for') || 'unknown';
   
+  console.log('[QR Stream] Connecting to session:', id, 'Total sessions:', qrSessions.size);
+  
   if (!checkRateLimit(ip)) {
     return new Response('Too Many Requests', { status: 429 });
   }
   
-  const session = qrSessions.get(id);
+  let session = qrSessions.get(id);
+  
+  // If session doesn't exist, create a placeholder (serverless cold start issue)
   if (!session) {
-    return new Response('Session not found', { status: 404 });
+    console.warn('[QR Stream] Session not found, creating placeholder:', id);
+    session = {
+      id,
+      token: '',
+      status: 'pending' as const,
+      createdAt: Date.now(),
+      expiresAt: Date.now() + (5 * 60 * 1000),
+    };
+    qrSessions.set(id, session);
   }
+  
+  console.log('[QR Stream] Session found:', session.status);
 
   const stream = new ReadableStream({
     start(controller) {
