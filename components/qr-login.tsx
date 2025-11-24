@@ -301,30 +301,6 @@ export function QRLogin() {
           </div>
         </CardContent>
       </Card>
-
-      {qrSession && (qrSession.status === 'pending' || qrSession.status === 'scanned') && (
-        <Card>
-          <CardHeader>
-            <CardTitle className="text-sm">Demo Controls</CardTitle>
-            <CardDescription className="text-xs">
-              Simulate mobile app actions for testing
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            <div className="flex gap-2">
-              <Button size="sm" variant="outline" onClick={() => simulateAction('scan')}>
-                Scan
-              </Button>
-              <Button size="sm" variant="outline" onClick={() => simulateAction('confirm')}>
-                Confirm
-              </Button>
-              <Button size="sm" variant="outline" onClick={() => simulateAction('reject')}>
-                Reject
-              </Button>
-            </div>
-          </CardContent>
-        </Card>
-      )}
     </div>
   );
 }
