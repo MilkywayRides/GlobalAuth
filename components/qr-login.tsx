@@ -114,18 +114,21 @@ export function QRLogin() {
           
           if (data.status === 'confirmed') {
             cleanup();
-            // Complete the login by creating web session
-            fetch('/api/auth/qr/complete', {
-              method: 'POST',
-              headers: { 'Content-Type': 'application/json' },
-              body: JSON.stringify({ sessionId: qrSession.id }),
-            }).then(() => {
-              setTimeout(() => {
-                window.location.href = '/dashboard';
-              }, 500);
-            }).catch(() => {
-              window.location.reload();
-            });
+            const sessionId = qrSession?.id;
+            if (sessionId) {
+              // Complete the login by creating web session
+              fetch('/api/auth/qr/complete', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ sessionId }),
+              }).then(() => {
+                setTimeout(() => {
+                  window.location.href = '/dashboard';
+                }, 500);
+              }).catch(() => {
+                window.location.reload();
+              });
+            }
           } else if (['rejected', 'expired'].includes(data.status)) {
             cleanup();
           }
