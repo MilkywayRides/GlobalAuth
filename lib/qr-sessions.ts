@@ -7,6 +7,7 @@ export const qrSessions = new Map<string, {
   expiresAt: number;
   userAgent?: string;
   ipAddress?: string;
+  userId?: string;
 }>();
 
 // Clean up expired sessions every 5 minutes
