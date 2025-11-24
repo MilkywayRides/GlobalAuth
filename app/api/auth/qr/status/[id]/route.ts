@@ -1,5 +1,7 @@
 import { NextResponse } from "next/server";
-import { qrSessions } from "@/lib/qr-sessions";
+import { db } from "@/lib/db";
+import { qrSession } from "@/lib/db/schema";
+import { eq } from "drizzle-orm";
 
 export async function GET(
   req: Request,
@@ -12,21 +14,31 @@ export async function GET(
       return NextResponse.json({ error: 'Session ID required' }, { status: 400 });
     }
 
-    const session = qrSessions.get(id);
+    const [session] = await db
+      .select()
+      .from(qrSession)
+      .where(eq(qrSession.id, id))
+      .limit(1);
     
     if (!session) {
       return NextResponse.json({ error: 'Session not found' }, { status: 404 });
     }
 
-    // Check if session is expired
-    if (session.expiresAt < Date.now()) {
-      session.status = 'expired';
-      qrSessions.set(id, session);
+    if (session.expiresAt < new Date()) {
+      await db
+        .update(qrSession)
+        .set({ status: 'expired' })
+        .where(eq(qrSession.id, id));
+      
+      return NextResponse.json({
+        status: 'expired',
+        expiresAt: session.expiresAt.getTime(),
+      });
     }
 
     return NextResponse.json({
       status: session.status,
-      expiresAt: session.expiresAt,
+      expiresAt: session.expiresAt.getTime(),
     });
   } catch (error) {
     console.error('Failed to check QR status:', error);
@@ -45,37 +57,47 @@ export async function POST(
     
     console.log('[QR Status] Session ID:', id, 'Action:', action, 'UserId:', userId);
     
-    const session = qrSessions.get(id);
+    const [session] = await db
+      .select()
+      .from(qrSession)
+      .where(eq(qrSession.id, id))
+      .limit(1);
     
-    if (!session || session.expiresAt < Date.now()) {
+    if (!session || session.expiresAt < new Date()) {
       return NextResponse.json({ error: 'Session not found or expired' }, { status: 404 });
     }
 
+    let newStatus = session.status;
+    let newUserId = session.userId;
+
     switch (action) {
       case 'scan':
-        session.status = 'scanned';
+        newStatus = 'scanned';
         break;
       case 'confirm':
-        session.status = 'confirmed';
-        // Store userId for web session creation
+        newStatus = 'confirmed';
         if (userId) {
-          session.userId = userId;
+          newUserId = userId;
           console.log('[QR Status] Stored userId:', userId);
         } else {
           console.warn('[QR Status] No userId provided in confirm action');
         }
         break;
       case 'reject':
-        session.status = 'rejected';
+        newStatus = 'rejected';
         break;
       default:
         return NextResponse.json({ error: 'Invalid action' }, { status: 400 });
     }
 
-    qrSessions.set(id, session);
-    console.log('[QR Status] Updated session:', session);
+    await db
+      .update(qrSession)
+      .set({ status: newStatus, userId: newUserId })
+      .where(eq(qrSession.id, id));
     
-    return NextResponse.json({ status: session.status });
+    console.log('[QR Status] Updated session to:', newStatus);
+    
+    return NextResponse.json({ status: newStatus });
   } catch (error) {
     console.error('Failed to update QR status:', error);
     return NextResponse.json({ error: 'Failed to update status' }, { status: 500 });

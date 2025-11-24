@@ -1,7 +1,6 @@
 import { NextResponse } from "next/server";
-import { qrSessions } from "@/lib/qr-sessions";
 import { db } from "@/lib/db";
-import { user, session } from "@/lib/db/schema";
+import { user, session, qrSession } from "@/lib/db/schema";
 import { eq } from "drizzle-orm";
 import { cookies } from "next/headers";
 import crypto from "crypto";
@@ -16,33 +15,36 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: 'Session ID required' }, { status: 400 });
     }
 
-    const qrSession = qrSessions.get(sessionId);
+    const [qrSessionData] = await db
+      .select()
+      .from(qrSession)
+      .where(eq(qrSession.id, sessionId))
+      .limit(1);
     
-    console.log('[QR Complete] QR Session:', qrSession);
+    console.log('[QR Complete] QR Session:', qrSessionData);
     
-    if (!qrSession) {
+    if (!qrSessionData) {
       return NextResponse.json({ error: 'Session not found' }, { status: 404 });
     }
     
-    if (qrSession.status !== 'confirmed') {
+    if (qrSessionData.status !== 'confirmed') {
       return NextResponse.json({ 
         error: 'Session not confirmed', 
-        status: qrSession.status 
+        status: qrSessionData.status 
       }, { status: 400 });
     }
 
-    if (!qrSession.userId) {
+    if (!qrSessionData.userId) {
       return NextResponse.json({ 
         error: 'No user associated with session',
         debug: 'Mobile app must send userId when confirming'
       }, { status: 400 });
     }
 
-    // Get user from database
     const [foundUser] = await db
       .select()
       .from(user)
-      .where(eq(user.id, qrSession.userId))
+      .where(eq(user.id, qrSessionData.userId))
       .limit(1);
 
     if (!foundUser) {
@@ -51,11 +53,9 @@ export async function POST(req: Request) {
 
     console.log('[QR Complete] Creating session for user:', foundUser.email);
 
-    // Create session token
     const sessionToken = crypto.randomBytes(32).toString('hex');
-    const expiresAt = new Date(Date.now() + 30 * 24 * 60 * 60 * 1000); // 30 days
+    const expiresAt = new Date(Date.now() + 30 * 24 * 60 * 60 * 1000);
 
-    // Create session in database
     await db.insert(session).values({
       id: crypto.randomUUID(),
       userId: foundUser.id,
@@ -67,20 +67,18 @@ export async function POST(req: Request) {
       userAgent: req.headers.get('user-agent') || null,
     });
 
-    // Set session cookie
     const cookieStore = await cookies();
     cookieStore.set('better-auth.session_token', sessionToken, {
       httpOnly: true,
       secure: process.env.NODE_ENV === 'production',
       sameSite: 'lax',
-      maxAge: 30 * 24 * 60 * 60, // 30 days
+      maxAge: 30 * 24 * 60 * 60,
       path: '/',
     });
 
     console.log('[QR Complete] Session created successfully');
 
-    // Clean up QR session
-    qrSessions.delete(sessionId);
+    await db.delete(qrSession).where(eq(qrSession.id, sessionId));
 
     return NextResponse.json({
       success: true,

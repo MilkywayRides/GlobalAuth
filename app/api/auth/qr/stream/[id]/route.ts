@@ -1,58 +1,30 @@
-import { qrSessions } from "@/lib/qr-sessions";
-
-const rateLimitMap = new Map<string, { count: number; resetTime: number }>();
-const RATE_LIMIT = 10;
-const WINDOW_MS = 60 * 1000;
-
-function checkRateLimit(ip: string): boolean {
-  const now = Date.now();
-  const limit = rateLimitMap.get(ip);
-  
-  if (!limit || now > limit.resetTime) {
-    rateLimitMap.set(ip, { count: 1, resetTime: now + WINDOW_MS });
-    return true;
-  }
-  
-  if (limit.count >= RATE_LIMIT) {
-    return false;
-  }
-  
-  limit.count++;
-  return true;
-}
+import { db } from "@/lib/db";
+import { qrSession } from "@/lib/db/schema";
+import { eq } from "drizzle-orm";
 
 export async function GET(
   req: Request,
   { params }: { params: Promise<{ id: string }> }
 ) {
   const { id } = await params;
-  const ip = req.headers.get('x-forwarded-for') || 'unknown';
   
-  console.log('[QR Stream] Connecting to session:', id, 'Total sessions:', qrSessions.size);
+  console.log('[QR Stream] Connecting to session:', id);
   
-  if (!checkRateLimit(ip)) {
-    return new Response('Too Many Requests', { status: 429 });
-  }
-  
-  let session = qrSessions.get(id);
-  
-  // If session doesn't exist, create a placeholder (serverless cold start issue)
+  const [session] = await db
+    .select()
+    .from(qrSession)
+    .where(eq(qrSession.id, id))
+    .limit(1);
+    
   if (!session) {
-    console.warn('[QR Stream] Session not found, creating placeholder:', id);
-    session = {
-      id,
-      token: '',
-      status: 'pending' as const,
-      createdAt: Date.now(),
-      expiresAt: Date.now() + (5 * 60 * 1000),
-    };
-    qrSessions.set(id, session);
+    console.error('[QR Stream] Session not found:', id);
+    return new Response('Session not found', { status: 404 });
   }
   
   console.log('[QR Stream] Session found:', session.status);
 
   const stream = new ReadableStream({
-    start(controller) {
+    async start(controller) {
       const encoder = new TextEncoder();
       let isClosed = false;
       let interval: NodeJS.Timeout | null = null;
@@ -72,39 +44,52 @@ export async function GET(
         }
       };
       
-      const sendUpdate = () => {
+      const sendUpdate = async () => {
         if (isClosed) return;
         
-        const currentSession = qrSessions.get(id);
-        if (!currentSession) {
-          cleanup();
-          return;
-        }
-
-        if (currentSession.expiresAt < Date.now()) {
-          currentSession.status = 'expired';
-          qrSessions.set(id, currentSession);
-        }
-
-        const data = JSON.stringify({
-          status: currentSession.status,
-          expiresAt: currentSession.expiresAt,
-        });
-
         try {
-          controller.enqueue(encoder.encode(`data: ${data}\n\n`));
-        } catch (e) {
-          cleanup();
-          return;
-        }
+          const [currentSession] = await db
+            .select()
+            .from(qrSession)
+            .where(eq(qrSession.id, id))
+            .limit(1);
+            
+          if (!currentSession) {
+            cleanup();
+            return;
+          }
 
-        if (['confirmed', 'rejected', 'expired'].includes(currentSession.status)) {
+          if (currentSession.expiresAt < new Date()) {
+            await db
+              .update(qrSession)
+              .set({ status: 'expired' })
+              .where(eq(qrSession.id, id));
+            currentSession.status = 'expired';
+          }
+
+          const data = JSON.stringify({
+            status: currentSession.status,
+            expiresAt: currentSession.expiresAt.getTime(),
+          });
+
+          try {
+            controller.enqueue(encoder.encode(`data: ${data}\n\n`));
+          } catch (e) {
+            cleanup();
+            return;
+          }
+
+          if (['confirmed', 'rejected', 'expired'].includes(currentSession.status)) {
+            cleanup();
+          }
+        } catch (error) {
+          console.error('[QR Stream] Error:', error);
           cleanup();
         }
       };
 
-      sendUpdate();
-      interval = setInterval(sendUpdate, 5000);
+      await sendUpdate();
+      interval = setInterval(sendUpdate, 3000);
 
       req.signal.addEventListener('abort', cleanup);
     },
@@ -113,8 +98,9 @@ export async function GET(
   return new Response(stream, {
     headers: {
       'Content-Type': 'text/event-stream',
-      'Cache-Control': 'no-cache',
+      'Cache-Control': 'no-cache, no-transform',
       'Connection': 'keep-alive',
+      'X-Accel-Buffering': 'no',
     },
   });
 }

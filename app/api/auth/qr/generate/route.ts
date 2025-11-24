@@ -1,37 +1,36 @@
 import { NextResponse } from "next/server";
 import { nanoid } from "nanoid";
 import QRCode from "qrcode";
-import { qrSessions } from "@/lib/qr-sessions";
+import { db } from "@/lib/db";
+import { qrSession } from "@/lib/db/schema";
 
 export async function POST(req: Request) {
   try {
     const sessionId = nanoid(32);
     const token = nanoid(64);
-    const now = Date.now();
-    const expiresAt = now + (5 * 60 * 1000);
+    const now = new Date();
+    const expiresAt = new Date(now.getTime() + 5 * 60 * 1000);
 
-    const session = {
+    await db.insert(qrSession).values({
       id: sessionId,
       token,
-      status: 'pending' as const,
+      status: 'pending',
       createdAt: now,
       expiresAt,
-    };
+      ipAddress: req.headers.get('x-forwarded-for') || req.headers.get('x-real-ip'),
+      userAgent: req.headers.get('user-agent'),
+    });
 
-    qrSessions.set(sessionId, session);
-    
-    console.log('[QR Generate] Created session:', sessionId, 'Total sessions:', qrSessions.size);
+    console.log('[QR Generate] Created session:', sessionId);
 
-    // Create QR data for mobile app
     const qrData = {
       type: 'blazeneuro_login',
       sessionId,
       token,
       domain: req.headers.get('host') || 'localhost:3000',
-      timestamp: now,
+      timestamp: now.getTime(),
     };
 
-    // Generate real QR code
     const qrCodeDataURL = await QRCode.toDataURL(JSON.stringify(qrData), {
       width: 200,
       margin: 2,
@@ -45,7 +44,7 @@ export async function POST(req: Request) {
       id: sessionId,
       qrCode: qrCodeDataURL,
       status: 'pending',
-      expiresAt,
+      expiresAt: expiresAt.getTime(),
     });
   } catch (error) {
     console.error('QR generation error:', error);

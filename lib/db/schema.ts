@@ -54,6 +54,17 @@ export const verification = pgTable("verification", {
   updatedAt: timestamp("updatedAt"),
 });
 
+export const qrSession = pgTable("qr_session", {
+  id: text("id").primaryKey(),
+  token: text("token").notNull(),
+  status: text("status").notNull().default("pending"),
+  userId: text("user_id"),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+  expiresAt: timestamp("expires_at").notNull(),
+  ipAddress: text("ip_address"),
+  userAgent: text("user_agent"),
+});
+
 // API Keys for developer access
 export const apiKeys = pgTable("api_keys", {
   id: text("id").primaryKey(),
