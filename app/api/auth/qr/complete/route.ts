@@ -10,18 +10,32 @@ export async function POST(req: Request) {
   try {
     const { sessionId } = await req.json();
     
+    console.log('[QR Complete] Session ID:', sessionId);
+    
     if (!sessionId) {
       return NextResponse.json({ error: 'Session ID required' }, { status: 400 });
     }
 
     const qrSession = qrSessions.get(sessionId);
     
-    if (!qrSession || qrSession.status !== 'confirmed') {
-      return NextResponse.json({ error: 'Invalid or unconfirmed session' }, { status: 400 });
+    console.log('[QR Complete] QR Session:', qrSession);
+    
+    if (!qrSession) {
+      return NextResponse.json({ error: 'Session not found' }, { status: 404 });
+    }
+    
+    if (qrSession.status !== 'confirmed') {
+      return NextResponse.json({ 
+        error: 'Session not confirmed', 
+        status: qrSession.status 
+      }, { status: 400 });
     }
 
     if (!qrSession.userId) {
-      return NextResponse.json({ error: 'No user associated with session' }, { status: 400 });
+      return NextResponse.json({ 
+        error: 'No user associated with session',
+        debug: 'Mobile app must send userId when confirming'
+      }, { status: 400 });
     }
 
     // Get user from database
@@ -34,6 +48,8 @@ export async function POST(req: Request) {
     if (!foundUser) {
       return NextResponse.json({ error: 'User not found' }, { status: 404 });
     }
+
+    console.log('[QR Complete] Creating session for user:', foundUser.email);
 
     // Create session token
     const sessionToken = crypto.randomBytes(32).toString('hex');
@@ -61,6 +77,8 @@ export async function POST(req: Request) {
       path: '/',
     });
 
+    console.log('[QR Complete] Session created successfully');
+
     // Clean up QR session
     qrSessions.delete(sessionId);
 
@@ -73,8 +91,11 @@ export async function POST(req: Request) {
         role: foundUser.role,
       }
     });
-  } catch (error) {
-    console.error('Failed to complete QR login:', error);
-    return NextResponse.json({ error: 'Failed to complete login' }, { status: 500 });
+  } catch (error: any) {
+    console.error('[QR Complete] Error:', error);
+    return NextResponse.json({ 
+      error: 'Failed to complete login',
+      message: error.message 
+    }, { status: 500 });
   }
 }

@@ -1,7 +1,5 @@
 import { NextResponse } from "next/server";
 import { qrSessions } from "@/lib/qr-sessions";
-import { auth } from "@/lib/auth";
-import { headers } from "next/headers";
 
 export async function GET(
   req: Request,
@@ -45,6 +43,8 @@ export async function POST(
     const body = await req.json();
     const { action, userId } = body;
     
+    console.log('[QR Status] Session ID:', id, 'Action:', action, 'UserId:', userId);
+    
     const session = qrSessions.get(id);
     
     if (!session || session.expiresAt < Date.now()) {
@@ -60,6 +60,9 @@ export async function POST(
         // Store userId for web session creation
         if (userId) {
           session.userId = userId;
+          console.log('[QR Status] Stored userId:', userId);
+        } else {
+          console.warn('[QR Status] No userId provided in confirm action');
         }
         break;
       case 'reject':
@@ -70,6 +73,8 @@ export async function POST(
     }
 
     qrSessions.set(id, session);
+    console.log('[QR Status] Updated session:', session);
+    
     return NextResponse.json({ status: session.status });
   } catch (error) {
     console.error('Failed to update QR status:', error);
