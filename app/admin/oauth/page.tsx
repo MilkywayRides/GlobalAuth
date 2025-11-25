@@ -8,7 +8,7 @@ import { AppSidebar } from "@/components/app-sidebar";
 import { SiteHeader } from "@/components/site-header";
 import { SidebarInset, SidebarProvider } from "@/components/ui/sidebar";
 import { PageLoadingSpinner } from "@/components/ui/loading-spinner";
-import { Plus, Copy } from "lucide-react";
+import { Plus, Copy, Trash2 } from "lucide-react";
 import Link from "next/link";
 import { toast } from "sonner";
 
@@ -45,7 +45,12 @@ export default function OAuthAppsPage() {
 
     const loadApps = async () => {
         try {
-            const res = await fetch("/api/admin/oauth/apps");
+            const res = await fetch("/api/admin/oauth/apps?" + new Date().getTime(), {
+                cache: 'no-store',
+                headers: {
+                    'Cache-Control': 'no-cache',
+                }
+            });
             if (res.ok) {
                 const data = await res.json();
                 setApps(data);
@@ -60,6 +65,34 @@ export default function OAuthAppsPage() {
     const copyToClipboard = (text: string) => {
         navigator.clipboard.writeText(text);
         toast.success("Copied to clipboard");
+    };
+
+    const deleteApp = async (appId: string, appName: string) => {
+        if (!confirm(`Are you sure you want to delete "${appName}"? This action cannot be undone.`)) {
+            return;
+        }
+
+        console.log('Deleting app:', appId, appName);
+
+        try {
+            const res = await fetch(`/api/admin/oauth/apps/${appId}`, {
+                method: 'DELETE',
+            });
+
+            console.log('Delete response status:', res.status);
+            const responseData = await res.json();
+            console.log('Delete response data:', responseData);
+
+            if (res.ok) {
+                toast.success("Application deleted successfully");
+                loadApps(); // Reload the list
+            } else {
+                toast.error(`Failed to delete application: ${responseData.error || 'Unknown error'}`);
+            }
+        } catch (error) {
+            console.error("Failed to delete app:", error);
+            toast.error("Failed to delete application");
+        }
     };
 
     if (loading) {
@@ -123,6 +156,16 @@ export default function OAuthAppsPage() {
                                                 {app.homepageUrl}
                                             </a>
                                         </div>
+                                    </div>
+                                    <div className="flex justify-end mt-4">
+                                        <Button 
+                                            variant="destructive" 
+                                            size="sm"
+                                            onClick={() => deleteApp(app.id, app.name)}
+                                        >
+                                            <Trash2 className="mr-2 h-4 w-4" />
+                                            Delete
+                                        </Button>
                                     </div>
                                 </CardContent>
                             </Card>

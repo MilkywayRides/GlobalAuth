@@ -107,16 +107,16 @@ export function EmergencyShutdown() {
                     <li>API key access</li>
                     <li>All user endpoints</li>
                   </ul>
-                  <p className="mt-2 font-medium">
+                  <span className="mt-2 font-medium block">
                     Only admin panel will remain accessible. This action should only be used in emergencies.
-                  </p>
+                  </span>
                 </>
               ) : (
                 <>
                   Are you sure you want to restore all authentication services?
-                  <p className="mt-2">
+                  <span className="mt-2 block">
                     This will re-enable all login, signup, and API access.
-                  </p>
+                  </span>
                 </>
               )}
             </AlertDialogDescription>

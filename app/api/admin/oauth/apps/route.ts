@@ -16,7 +16,14 @@ export async function GET(req: Request) {
     }
 
     const apps = await db.select().from(applications);
-    return NextResponse.json(apps);
+    
+    return NextResponse.json(apps, {
+        headers: {
+            'Cache-Control': 'no-store, no-cache, must-revalidate, proxy-revalidate',
+            'Pragma': 'no-cache',
+            'Expires': '0',
+        },
+    });
 }
 
 export async function POST(req: Request) {
