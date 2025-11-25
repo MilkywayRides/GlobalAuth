@@ -20,6 +20,7 @@ export default function AuthorizePage() {
   const redirectUri = searchParams.get('redirect_uri');
   const scope = searchParams.get('scope');
   const state = searchParams.get('state');
+  const appName = searchParams.get('app_name');
 
   const scopes = scope?.split(',') || [];
 
@@ -118,7 +119,7 @@ export default function AuthorizePage() {
           <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-gradient-to-r from-blue-600 to-purple-600">
             <span className="text-2xl font-bold text-white">BN</span>
           </div>
-          <CardTitle className="text-2xl">BlazeNeuro</CardTitle>
+          <CardTitle className="text-2xl">{appName || 'Application'}</CardTitle>
           <CardDescription>wants to access your account</CardDescription>
         </CardHeader>
         

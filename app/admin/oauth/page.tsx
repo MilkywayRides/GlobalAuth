@@ -4,11 +4,13 @@ import { useEffect, useState } from "react";
 import { authClient } from "@/lib/auth-client";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
+import { Label } from "@/components/ui/label";
 import { AppSidebar } from "@/components/app-sidebar";
 import { SiteHeader } from "@/components/site-header";
 import { SidebarInset, SidebarProvider } from "@/components/ui/sidebar";
 import { PageLoadingSpinner } from "@/components/ui/loading-spinner";
-import { Plus, Copy, Trash2 } from "lucide-react";
+import { Plus, Copy, Trash2, Settings } from "lucide-react";
 import Link from "next/link";
 import { toast } from "sonner";
 
@@ -134,36 +136,94 @@ export default function OAuthAppsPage() {
 
                     <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
                         {apps.map((app) => (
-                            <Card key={app.id}>
-                                <CardHeader>
-                                    <CardTitle>{app.name}</CardTitle>
-                                    <CardDescription>{app.appType}</CardDescription>
+                            <Card key={app.id} className="hover:shadow-md transition-shadow border-border">
+                                <CardHeader className="pb-3">
+                                    <div className="flex items-start justify-between">
+                                        <div className="space-y-1">
+                                            <CardTitle className="text-lg">{app.name}</CardTitle>
+                                            <CardDescription className="flex items-center gap-2">
+                                                <span>{app.appType}</span>
+                                                <span className="text-muted-foreground">•</span>
+                                                <Badge variant="default" className="text-xs">
+                                                    Full Access
+                                                </Badge>
+                                            </CardDescription>
+                                        </div>
+                                    </div>
                                 </CardHeader>
-                                <CardContent>
-                                    <div className="space-y-2 text-sm">
+                                <CardContent className="space-y-4">
+                                    <div className="space-y-3">
                                         <div>
-                                            <span className="font-semibold block">Client ID:</span>
-                                            <div className="flex items-center gap-2 bg-muted p-2 rounded mt-1">
-                                                <code className="truncate flex-1">{app.clientId}</code>
-                                                <Button variant="ghost" size="icon" className="h-6 w-6" onClick={() => copyToClipboard(app.clientId)}>
+                                            <Label className="text-xs font-medium text-muted-foreground">CLIENT ID</Label>
+                                            <div className="flex items-center gap-2 mt-1">
+                                                <code className="flex-1 text-xs bg-muted/50 px-2 py-1.5 rounded border font-mono truncate">
+                                                    {app.clientId}
+                                                </code>
+                                                <Button 
+                                                    variant="ghost" 
+                                                    size="sm"
+                                                    className="h-7 w-7 p-0 hover:bg-muted"
+                                                    onClick={() => copyToClipboard(app.clientId)}
+                                                >
                                                     <Copy className="h-3 w-3" />
                                                 </Button>
                                             </div>
                                         </div>
+                                        
+                                        {app.homepageUrl && (
+                                            <div>
+                                                <Label className="text-xs font-medium text-muted-foreground">HOMEPAGE</Label>
+                                                <a 
+                                                    href={app.homepageUrl} 
+                                                    target="_blank" 
+                                                    rel="noreferrer"
+                                                    className="block text-xs text-primary hover:underline truncate mt-1"
+                                                >
+                                                    {app.homepageUrl}
+                                                </a>
+                                            </div>
+                                        )}
+                                        
                                         <div>
-                                            <span className="font-semibold block">Homepage:</span>
-                                            <a href={app.homepageUrl} target="_blank" rel="noreferrer" className="text-blue-500 hover:underline truncate block">
-                                                {app.homepageUrl}
-                                            </a>
+                                            <Label className="text-xs font-medium text-muted-foreground">REDIRECT URIS</Label>
+                                            <div className="space-y-1 mt-1">
+                                                {(Array.isArray(app.redirectUris) ? app.redirectUris : []).slice(0, 2).map((uri: string, idx: number) => (
+                                                    <div key={idx} className="text-xs text-muted-foreground bg-muted/30 px-2 py-1 rounded truncate">
+                                                        {uri}
+                                                    </div>
+                                                ))}
+                                                {Array.isArray(app.redirectUris) && app.redirectUris.length > 2 && (
+                                                    <div className="text-xs text-muted-foreground">
+                                                        +{app.redirectUris.length - 2} more
+                                                    </div>
+                                                )}
+                                            </div>
+                                        </div>
+                                        
+                                        <div className="pt-2 border-t border-border">
+                                            <div className="flex items-center justify-between text-xs text-muted-foreground">
+                                                <span>Created {new Date(app.createdAt).toLocaleDateString()}</span>
+                                                <Badge variant="outline" className="text-xs">
+                                                    Admin Created
+                                                </Badge>
+                                            </div>
                                         </div>
                                     </div>
-                                    <div className="flex justify-end mt-4">
+                                    
+                                    <div className="flex justify-between pt-2">
+                                        <Link href={`/admin/oauth/${app.id}`}>
+                                            <Button variant="outline" size="sm" className="h-8">
+                                                <Settings className="mr-2 h-3 w-3" />
+                                                Settings
+                                            </Button>
+                                        </Link>
                                         <Button 
                                             variant="destructive" 
                                             size="sm"
+                                            className="h-8"
                                             onClick={() => deleteApp(app.id, app.name)}
                                         >
-                                            <Trash2 className="mr-2 h-4 w-4" />
+                                            <Trash2 className="mr-2 h-3 w-3" />
                                             Delete
                                         </Button>
                                     </div>

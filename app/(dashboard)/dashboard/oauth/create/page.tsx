@@ -2,317 +2,154 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { AppSidebar } from "@/components/app-sidebar";
-import { SiteHeader } from "@/components/site-header";
-import { SidebarInset, SidebarProvider } from "@/components/ui/sidebar";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
-import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Copy, Check, ArrowLeft } from "lucide-react";
+import { ArrowLeft } from "lucide-react";
 import Link from "next/link";
-import { authClient } from "@/lib/auth-client";
+import { toast } from "sonner";
 
-export default function CreateOAuthAppPage() {
-    const router = useRouter();
-    const { data: session, isPending } = authClient.useSession();
-    const [formData, setFormData] = useState({
-        name: "",
-        description: "",
-        appType: "web",
-        homepageUrl: "",
-        redirectUris: "",
-    });
-    const [loading, setLoading] = useState(false);
-    const [error, setError] = useState("");
-    const [createdApp, setCreatedApp] = useState<{
-        clientId: string;
-        clientSecret: string;
-        name: string;
-    } | null>(null);
-    const [copiedId, setCopiedId] = useState(false);
-    const [copiedSecret, setCopiedSecret] = useState(false);
+export default function CreateUserOAuthApp() {
+  const router = useRouter();
+  const [isLoading, setIsLoading] = useState(false);
+  const [formData, setFormData] = useState({
+    name: "",
+    homepageUrl: "",
+    redirectUris: "",
+    appType: "web",
+  });
 
-    const handleSubmit = async (e: React.FormEvent) => {
-        e.preventDefault();
-        setError("");
-        setLoading(true);
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setIsLoading(true);
 
-        try {
-            const res = await fetch("/api/user/oauth/apps", {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify(formData),
-            });
+    try {
+      const redirectUrisArray = formData.redirectUris
+        .split('\n')
+        .map(uri => uri.trim())
+        .filter(uri => uri.length > 0);
 
-            const data = await res.json();
+      const res = await fetch("/api/user/oauth/apps", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          ...formData,
+          redirectUris: redirectUrisArray,
+        }),
+      });
 
-            if (!res.ok) {
-                throw new Error(data.error || "Failed to create application");
-            }
+      if (res.ok) {
+        const data = await res.json();
+        toast.success("Application created successfully!");
+        
+        // Show the credentials in a modal or alert
+        alert(`Application created!\n\nClient ID: ${data.clientId}\nClient Secret: ${data.clientSecret}\n\nSave these credentials securely!`);
+        
+        router.push("/dashboard/oauth");
+      } else {
+        const error = await res.json();
+        toast.error(error.error || "Failed to create application");
+      }
+    } catch (error) {
+      console.error("Failed to create app:", error);
+      toast.error("Failed to create application");
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
-            setCreatedApp(data);
-        } catch (err: any) {
-            setError(err.message);
-        } finally {
-            setLoading(false);
-        }
-    };
+  return (
+    <div className="container max-w-2xl mx-auto p-6">
+      <div className="flex items-center gap-4 mb-6">
+        <Link href="/dashboard/oauth">
+          <Button variant="ghost" size="sm">
+            <ArrowLeft className="mr-2 h-4 w-4" />
+            Back to Applications
+          </Button>
+        </Link>
+        <div>
+          <h1 className="text-2xl font-bold">Create OAuth Application</h1>
+          <p className="text-muted-foreground">Create a new OAuth application with basic access</p>
+        </div>
+      </div>
 
-    const handleCopy = (text: string, type: 'id' | 'secret') => {
-        navigator.clipboard.writeText(text);
-        if (type === 'id') {
-            setCopiedId(true);
-            setTimeout(() => setCopiedId(false), 2000);
-        } else {
-            setCopiedSecret(true);
-            setTimeout(() => setCopiedSecret(false), 2000);
-        }
-    };
-
-    if (isPending) {
-        return (
-            <div className="min-h-screen flex items-center justify-center">
-                <div>Loading...</div>
+      <Card>
+        <CardHeader>
+          <CardTitle>Application Details</CardTitle>
+          <CardDescription>
+            Basic information about your OAuth application. This will have basic access (id, email, name, avatar only).
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          <form onSubmit={handleSubmit} className="space-y-4">
+            <div className="space-y-2">
+              <Label htmlFor="name">Application Name *</Label>
+              <Input
+                id="name"
+                value={formData.name}
+                onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                placeholder="My Application"
+                required
+              />
             </div>
-        );
-    }
 
-    if (!session) {
-        return null;
-    }
+            <div className="space-y-2">
+              <Label htmlFor="homepage">Homepage URL</Label>
+              <Input
+                id="homepage"
+                type="url"
+                value={formData.homepageUrl}
+                onChange={(e) => setFormData({ ...formData, homepageUrl: e.target.value })}
+                placeholder="https://myapp.com"
+              />
+            </div>
 
-    const user = {
-        name: session.user.name,
-        email: session.user.email,
-        avatar: session.user.image || "",
-        role: session.user.role,
-    };
+            <div className="space-y-2">
+              <Label htmlFor="redirectUris">Redirect URIs *</Label>
+              <Textarea
+                id="redirectUris"
+                value={formData.redirectUris}
+                onChange={(e) => setFormData({ ...formData, redirectUris: e.target.value })}
+                placeholder="https://myapp.com/callback&#10;https://localhost:3000/callback"
+                rows={3}
+                required
+              />
+              <p className="text-xs text-muted-foreground">
+                One URI per line. These are the allowed callback URLs for your application.
+              </p>
+            </div>
 
-    if (createdApp) {
-        return (
-            <SidebarProvider
-                style={
-                    {
-                        "--sidebar-width": "calc(var(--spacing) * 72)",
-                        "--header-height": "calc(var(--spacing) * 12)",
-                    } as React.CSSProperties
-                }
-            >
-                <AppSidebar variant="inset" user={user} />
-                <SidebarInset>
-                    <SiteHeader />
-                    <div className="flex flex-1 flex-col">
-                        <div className="@container/main flex flex-1 flex-col gap-2">
-                            <div className="flex flex-col gap-4 py-4 md:gap-6 md:py-6 px-4 lg:px-6 max-w-3xl mx-auto w-full">
-                                <div className="flex items-center gap-2">
-                                    <Link href="/dashboard/oauth">
-                                        <Button variant="ghost" size="icon">
-                                            <ArrowLeft className="w-4 h-4" />
-                                        </Button>
-                                    </Link>
-                                    <h1 className="text-3xl font-bold">Application Created</h1>
-                                </div>
+            <div className="space-y-2">
+              <Label htmlFor="appType">Application Type</Label>
+              <Select value={formData.appType} onValueChange={(value) => setFormData({ ...formData, appType: value })}>
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="web">Web Application</SelectItem>
+                  <SelectItem value="mobile">Mobile Application</SelectItem>
+                  <SelectItem value="desktop">Desktop Application</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
 
-                                <Alert className="bg-green-50 dark:bg-green-950/30 border-green-200 dark:border-green-800">
-                                    <AlertDescription className="text-green-900 dark:text-green-300">
-                                        Your OAuth application has been created successfully. Make sure to copy your Client Secret now - you won't be able to see it again!
-                                    </AlertDescription>
-                                </Alert>
+            <div className="bg-yellow-50 p-4 rounded-lg">
+              <h4 className="font-semibold text-sm mb-2">Access Level: Basic</h4>
+              <p className="text-xs text-muted-foreground">
+                This application will only have access to basic user information: id, email, name, and avatar.
+                For full access, contact an administrator.
+              </p>
+            </div>
 
-                                <Card>
-                                    <CardHeader>
-                                        <CardTitle>{createdApp.name}</CardTitle>
-                                        <CardDescription>
-                                            Save these credentials securely. The Client Secret will only be shown once.
-                                        </CardDescription>
-                                    </CardHeader>
-                                    <CardContent className="space-y-4">
-                                        <div className="space-y-2">
-                                            <Label>Client ID</Label>
-                                            <div className="flex items-center gap-2">
-                                                <code className="flex-1 bg-muted px-4 py-3 rounded-lg text-sm font-mono">
-                                                    {createdApp.clientId}
-                                                </code>
-                                                <Button
-                                                    variant="outline"
-                                                    size="icon"
-                                                    onClick={() => handleCopy(createdApp.clientId, 'id')}
-                                                    className="flex-shrink-0"
-                                                >
-                                                    {copiedId ? (
-                                                        <Check className="w-4 h-4 text-green-600" />
-                                                    ) : (
-                                                        <Copy className="w-4 h-4" />
-                                                    )}
-                                                </Button>
-                                            </div>
-                                        </div>
-
-                                        <div className="space-y-2">
-                                            <Label>Client Secret</Label>
-                                            <div className="flex items-center gap-2">
-                                                <code className="flex-1 bg-muted px-4 py-3 rounded-lg text-sm font-mono">
-                                                    {createdApp.clientSecret}
-                                                </code>
-                                                <Button
-                                                    variant="outline"
-                                                    size="icon"
-                                                    onClick={() => handleCopy(createdApp.clientSecret, 'secret')}
-                                                    className="flex-shrink-0"
-                                                >
-                                                    {copiedSecret ? (
-                                                        <Check className="w-4 h-4 text-green-600" />
-                                                    ) : (
-                                                        <Copy className="w-4 h-4" />
-                                                    )}
-                                                </Button>
-                                            </div>
-                                        </div>
-                                    </CardContent>
-                                    <CardFooter>
-                                        <Link href="/dashboard/oauth" className="w-full">
-                                            <Button className="w-full">Done</Button>
-                                        </Link>
-                                    </CardFooter>
-                                </Card>
-                            </div>
-                        </div>
-                    </div>
-                </SidebarInset>
-            </SidebarProvider>
-        );
-    }
-
-    return (
-        <SidebarProvider
-            style={
-                {
-                    "--sidebar-width": "calc(var(--spacing) * 72)",
-                    "--header-height": "calc(var(--spacing) * 12)",
-                } as React.CSSProperties
-            }
-        >
-            <AppSidebar variant="inset" user={user} />
-            <SidebarInset>
-                <SiteHeader />
-                <div className="flex flex-1 flex-col">
-                    <div className="@container/main flex flex-1 flex-col gap-2">
-                        <div className="flex flex-col gap-4 py-4 md:gap-6 md:py-6 px-4 lg:px-6 max-w-3xl mx-auto w-full">
-                            <div className="flex items-center gap-2">
-                                <Link href="/dashboard/oauth">
-                                    <Button variant="ghost" size="icon">
-                                        <ArrowLeft className="w-4 h-4" />
-                                    </Button>
-                                </Link>
-                                <h1 className="text-3xl font-bold">Create OAuth Application</h1>
-                            </div>
-
-                            <Card>
-                                <form onSubmit={handleSubmit}>
-                                    <CardHeader>
-                                        <CardTitle>New OAuth Application</CardTitle>
-                                        <CardDescription>
-                                            Register a new OAuth application to enable third-party integrations
-                                        </CardDescription>
-                                    </CardHeader>
-                                    <CardContent className="space-y-4">
-                                        {error && (
-                                            <Alert variant="destructive">
-                                                <AlertDescription>{error}</AlertDescription>
-                                            </Alert>
-                                        )}
-
-                                        <div className="space-y-2">
-                                            <Label htmlFor="name">Application Name *</Label>
-                                            <Input
-                                                id="name"
-                                                placeholder="My Awesome App"
-                                                value={formData.name}
-                                                onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                                                required
-                                                disabled={loading}
-                                            />
-                                        </div>
-
-                                        <div className="space-y-2">
-                                            <Label htmlFor="description">Description</Label>
-                                            <Textarea
-                                                id="description"
-                                                placeholder="What does your application do?"
-                                                value={formData.description}
-                                                onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-                                                disabled={loading}
-                                                rows={3}
-                                            />
-                                        </div>
-
-                                        <div className="space-y-2">
-                                            <Label htmlFor="appType">Application Type *</Label>
-                                            <Select
-                                                value={formData.appType}
-                                                onValueChange={(value) => setFormData({ ...formData, appType: value })}
-                                                disabled={loading}
-                                            >
-                                                <SelectTrigger>
-                                                    <SelectValue placeholder="Select application type" />
-                                                </SelectTrigger>
-                                                <SelectContent>
-                                                    <SelectItem value="web">Web Application</SelectItem>
-                                                    <SelectItem value="native">Native Application</SelectItem>
-                                                    <SelectItem value="spa">Single Page Application</SelectItem>
-                                                    <SelectItem value="service">Service/Machine-to-Machine</SelectItem>
-                                                </SelectContent>
-                                            </Select>
-                                        </div>
-
-                                        <div className="space-y-2">
-                                            <Label htmlFor="homepageUrl">Homepage URL</Label>
-                                            <Input
-                                                id="homepageUrl"
-                                                type="url"
-                                                placeholder="https://example.com"
-                                                value={formData.homepageUrl}
-                                                onChange={(e) => setFormData({ ...formData, homepageUrl: e.target.value })}
-                                                disabled={loading}
-                                            />
-                                        </div>
-
-                                        <div className="space-y-2">
-                                            <Label htmlFor="redirectUris">Authorization Callback URL *</Label>
-                                            <Input
-                                                id="redirectUris"
-                                                type="url"
-                                                placeholder="https://example.com/oauth/callback"
-                                                value={formData.redirectUris}
-                                                onChange={(e) => setFormData({ ...formData, redirectUris: e.target.value })}
-                                                required
-                                                disabled={loading}
-                                            />
-                                            <p className="text-xs text-muted-foreground">
-                                                Users will be redirected here after authorization
-                                            </p>
-                                        </div>
-                                    </CardContent>
-                                    <CardFooter className="flex gap-2">
-                                        <Link href="/dashboard/oauth" className="flex-1">
-                                            <Button type="button" variant="outline" className="w-full" disabled={loading}>
-                                                Cancel
-                                            </Button>
-                                        </Link>
-                                        <Button type="submit" className="flex-1" disabled={loading || !formData.name || !formData.redirectUris}>
-                                            {loading ? "Creating..." : "Create Application"}
-                                        </Button>
-                                    </CardFooter>
-                                </form>
-                            </Card>
-                        </div>
-                    </div>
-                </div>
-            </SidebarInset>
-        </SidebarProvider>
-    );
+            <Button type="submit" disabled={isLoading} className="w-full">
+              {isLoading ? "Creating..." : "Create Application"}
+            </Button>
+          </form>
+        </CardContent>
+      </Card>
+    </div>
+  );
 }

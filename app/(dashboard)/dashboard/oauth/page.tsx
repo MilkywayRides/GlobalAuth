@@ -60,10 +60,21 @@ export default function UserOAuthPage() {
 
   const loadApps = async () => {
     try {
-      const res = await fetch("/api/user/oauth/apps");
+      console.log('Loading apps from frontend...');
+      const res = await fetch("/api/user/oauth/apps?" + new Date().getTime(), {
+        cache: 'no-store',
+        headers: {
+          'Cache-Control': 'no-cache',
+        }
+      });
+      console.log('Response status:', res.status);
       if (res.ok) {
         const data = await res.json();
-        setApps(data.apps);
+        console.log('Received apps data:', data);
+        console.log('Apps array length:', data.length);
+        setApps(data); // API returns apps array directly, not data.apps
+      } else {
+        console.error('Failed to load apps, status:', res.status);
       }
     } catch (error) {
       console.error("Failed to load apps:", error);
@@ -244,7 +255,7 @@ export default function UserOAuthPage() {
           </div>
 
           <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-            {apps.map((app) => (
+            {apps && apps.length > 0 ? apps.map((app) => (
               <Card key={app.id}>
                 <CardHeader>
                   <div className="flex items-start justify-between">
@@ -309,10 +320,8 @@ export default function UserOAuthPage() {
                   </div>
                 </CardContent>
               </Card>
-            ))}
-            {apps.length === 0 && (
+            )) : (
               <div className="col-span-full text-center py-12 text-muted-foreground">
-                <Key className="h-12 w-12 mx-auto mb-4 opacity-50" />
                 <p>No OAuth applications found.</p>
                 <p className="text-sm">Create your first application to get started.</p>
               </div>

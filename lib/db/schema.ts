@@ -103,6 +103,7 @@ export const applications = pgTable("applications", {
   homepageUrl: text("homepage_url"),
   appType: text("app_type").notNull().default("web"), // "web", "native", "spa"
   isActive: boolean("is_active").default(true),
+  isAdmin: boolean("is_admin").default(false).notNull(), // Track admin-created apps
   createdAt: timestamp("created_at").notNull().defaultNow(),
   updatedAt: timestamp("updated_at").notNull().defaultNow(),
 });

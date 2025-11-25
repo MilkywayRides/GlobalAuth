@@ -2,9 +2,10 @@ import { NextRequest, NextResponse } from 'next/server';
 import { auth } from '@/lib/auth';
 import { db } from '@/lib/db';
 import { applications } from '@/lib/db/schema';
-import { eq, and } from 'drizzle-orm';
+import { eq } from 'drizzle-orm';
+import crypto from 'crypto';
 
-export async function DELETE(
+export async function POST(
   request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
@@ -15,20 +16,21 @@ export async function DELETE(
       headers: request.headers,
     });
 
-    if (!session?.user) {
+    if (!session?.user || session.user.role !== 'admin') {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
-    // Delete only user's own applications
-    const result = await db.delete(applications)
-      .where(and(
-        eq(applications.id, id),
-        eq(applications.userId, session.user.id)
-      ));
+    // Generate new client secret
+    const newClientSecret = `bn_${crypto.randomBytes(32).toString("hex")}`;
 
-    return NextResponse.json({ success: true });
+    // Update the OAuth application with new secret
+    await db.update(applications)
+      .set({ clientSecret: newClientSecret })
+      .where(eq(applications.id, id));
+
+    return NextResponse.json({ clientSecret: newClientSecret });
   } catch (error) {
-    console.error('Delete user OAuth app error:', error);
+    console.error('Regenerate secret error:', error);
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
   }
 }
