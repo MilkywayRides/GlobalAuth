@@ -16,8 +16,8 @@ const categoryIcons = {
 };
 
 export function DocsLayout({ children }: { children: React.ReactNode }) {
-  const docs = getAllDocs();
-  const categories = getCategories();
+  const docs = getAllDocs() || [];
+  const categories = getCategories() || [];
 
   const tree = {
     name: 'Documentation',
@@ -38,20 +38,8 @@ export function DocsLayout({ children }: { children: React.ReactNode }) {
     }),
   };
 
-  // Create search index for Fumadocs
-  const searchIndex = docs.map(doc => ({
-    title: doc.title,
-    description: doc.description,
-    url: `/docs/${doc.slug}`,
-    keywords: [doc.category, ...doc.sections.map(s => s.title)],
-  }));
-
   return (
-    <RootProvider
-      search={{
-        enabled: true,
-      }}
-    >
+    <RootProvider>
       <FumaDocsLayout
         tree={tree}
         nav={{
