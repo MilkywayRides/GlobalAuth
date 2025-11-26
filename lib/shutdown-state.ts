@@ -1,33 +1,58 @@
 import { db } from "@/lib/db";
-import { systemMetrics } from "@/lib/db/schema";
-import { eq } from "drizzle-orm";
+import { systemStatus } from "@/lib/db/schema";
+import { sql } from "drizzle-orm";
 
-const SHUTDOWN_METRIC_NAME = "emergency_shutdown";
+let tableInitialized = false;
 
-export async function setShutdownState(active: boolean) {
-  await db.insert(systemMetrics).values({
-    id: SHUTDOWN_METRIC_NAME,
-    metricName: SHUTDOWN_METRIC_NAME,
-    metricValue: active ? 1 : 0,
-    timestamp: new Date(),
+async function ensureTable() {
+  if (tableInitialized) return;
+  
+  try {
+    await db.execute(sql`
+      CREATE TABLE IF NOT EXISTS "system_status" (
+        "id" text PRIMARY KEY DEFAULT 'system' NOT NULL,
+        "status" text DEFAULT 'on' NOT NULL,
+        "updated_at" timestamp DEFAULT now() NOT NULL,
+        "updated_by" text
+      );
+    `);
+    tableInitialized = true;
+  } catch (error) {
+    // Table might already exist
+    tableInitialized = true;
+  }
+}
+
+export async function setSystemStatus(status: "on" | "poweroff", userId?: string) {
+  await ensureTable();
+  
+  await db.insert(systemStatus).values({
+    id: "system",
+    status,
+    updatedAt: new Date(),
+    updatedBy: userId,
   }).onConflictDoUpdate({
-    target: systemMetrics.id,
+    target: systemStatus.id,
     set: {
-      metricValue: active ? 1 : 0,
-      timestamp: new Date(),
+      status,
+      updatedAt: new Date(),
+      updatedBy: userId,
     }
   });
 }
 
-export async function getShutdownState(): Promise<boolean> {
+export async function getSystemStatus(): Promise<"on" | "poweroff"> {
+  await ensureTable();
+  
   try {
-    const result = await db.select()
-      .from(systemMetrics)
-      .where(eq(systemMetrics.id, SHUTDOWN_METRIC_NAME))
-      .limit(1);
-    
-    return result.length > 0 ? result[0].metricValue === 1 : false;
+    const result = await db.select().from(systemStatus).limit(1);
+    return result.length > 0 ? (result[0].status as "on" | "poweroff") : "on";
   } catch {
-    return false;
+    return "on";
   }
+}
+
+export async function isSystemOn(): Promise<boolean> {
+  const status = await getSystemStatus();
+  return status === "on";
 }

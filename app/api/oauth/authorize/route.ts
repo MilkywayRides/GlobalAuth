@@ -2,8 +2,31 @@ import { NextRequest, NextResponse } from 'next/server';
 import { db } from '@/lib/db';
 import { applications } from '@/lib/db/schema';
 import { eq } from 'drizzle-orm';
+import { isSystemOn } from '@/lib/shutdown-state';
+import { auth } from '@/lib/auth';
+import { headers } from 'next/headers';
 
 export async function GET(request: NextRequest) {
+  // Check shutdown status first
+  const systemOn = await isSystemOn();
+  if (!systemOn) {
+    // Check if user is admin
+    try {
+      const session = await auth.api.getSession({
+        headers: await headers(),
+      });
+      if (!session?.user || session.user.role !== 'admin') {
+        return NextResponse.json({ 
+          error: 'System is powered off by the BlazeNeuro Team. Please contact administrator.'
+        }, { status: 503 });
+      }
+    } catch (error) {
+      return NextResponse.json({ 
+        error: 'System is powered off by the BlazeNeuro Team. Please contact administrator.'
+      }, { status: 503 });
+    }
+  }
+
   const { searchParams } = new URL(request.url);
   const clientId = searchParams.get('client_id');
   const redirectUri = searchParams.get('redirect_uri');

@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@/lib/auth";
 import { headers } from "next/headers";
-import { setShutdownState, getShutdownState } from "@/lib/shutdown-state";
+import { setSystemStatus, getSystemStatus } from "@/lib/shutdown-state";
 
 export async function GET() {
   try {
@@ -13,7 +13,8 @@ export async function GET() {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    return NextResponse.json({ shutdown: getShutdownState() });
+    const status = await getSystemStatus();
+    return NextResponse.json({ shutdown: status === "poweroff" });
   } catch (error) {
     return NextResponse.json({ error: "Internal server error" }, { status: 500 });
   }
@@ -30,15 +31,15 @@ export async function POST(request: NextRequest) {
     }
 
     const { shutdown } = await request.json();
-    setShutdownState(shutdown);
+    await setSystemStatus(shutdown ? "poweroff" : "on", session.user.id);
 
     if (shutdown) {
-      console.log("🚨 EMERGENCY SHUTDOWN ACTIVATED by", session.user.email);
+      console.log("🚨 SYSTEM POWERED OFF by", session.user.email);
     } else {
-      console.log("✅ Emergency shutdown deactivated by", session.user.email);
+      console.log("✅ System powered on by", session.user.email);
     }
 
-    return NextResponse.json({ success: true, shutdown: getShutdownState() });
+    return NextResponse.json({ success: true, shutdown });
   } catch (error) {
     return NextResponse.json({ error: "Internal server error" }, { status: 500 });
   }

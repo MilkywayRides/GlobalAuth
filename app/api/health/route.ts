@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { db } from "@/lib/db";
-import { getShutdownState } from "@/lib/shutdown-state";
+import { isSystemOn } from "@/lib/shutdown-state";
 
 export async function GET() {
   try {
@@ -8,20 +8,20 @@ export async function GET() {
     await db.execute("SELECT 1");
     
     // Check emergency shutdown status
-    const isShutdown = await getShutdownState();
+    const systemOn = await isSystemOn();
     
     const health = {
-      status: isShutdown ? "unhealthy" : "healthy",
+      status: systemOn ? "healthy" : "unhealthy",
       timestamp: new Date().toISOString(),
       version: process.env.npm_package_version || "1.0.0",
       environment: process.env.NODE_ENV,
       uptime: process.uptime(),
       memory: process.memoryUsage(),
-      emergencyShutdown: isShutdown,
+      emergencyShutdown: !systemOn,
     };
 
     return NextResponse.json(health, { 
-      status: isShutdown ? 503 : 200 
+      status: systemOn ? 200 : 503 
     });
   } catch (error) {
     const health = {

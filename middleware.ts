@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { isSystemOn } from '@/lib/shutdown-state';
 
 export async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
@@ -13,6 +14,17 @@ export async function middleware(request: NextRequest) {
         'Access-Control-Allow-Headers': 'Content-Type, Authorization',
       },
     });
+  }
+
+  // Check system status - allow only admin routes when powered off
+  if (!pathname.startsWith('/admin') && !pathname.startsWith('/api/admin')) {
+    const systemOn = await isSystemOn();
+    if (!systemOn) {
+      return NextResponse.json(
+        { error: "System is powered off by the BlazeNeuro Team. Please contact administrator." },
+        { status: 503 }
+      );
+    }
   }
 
   // Create response
@@ -37,5 +49,6 @@ export async function middleware(request: NextRequest) {
 export const config = {
   matcher: [
     '/api/:path*',
+    '/((?!_next/static|_next/image|favicon.ico).*)',
   ],
 };

@@ -162,3 +162,11 @@ export const activityLogs = pgTable("activity_logs", {
   timestamp: timestamp("timestamp").notNull().defaultNow(),
   metadata: json("metadata"),
 });
+
+// System Status
+export const systemStatus = pgTable("system_status", {
+  id: text("id").primaryKey().default("system"),
+  status: text("status").notNull().default("on"), // "on" or "poweroff"
+  updatedAt: timestamp("updated_at").notNull().defaultNow(),
+  updatedBy: text("updated_by").references(() => user.id),
+});

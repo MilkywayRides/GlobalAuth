@@ -13,10 +13,22 @@ export default function AdminPage() {
   const [stats, setStats] = useState({ users: 0, admins: 0 });
   const [loading, setLoading] = useState(true);
   const [session, setSession] = useState<any>(null);
+  const [systemStatus, setSystemStatus] = useState<"on" | "poweroff">("on");
 
   useEffect(() => {
     checkSession();
+    checkSystemStatus();
   }, []);
+
+  const checkSystemStatus = async () => {
+    try {
+      const response = await fetch("/api/admin/emergency-shutdown");
+      const data = await response.json();
+      setSystemStatus(data.shutdown ? "poweroff" : "on");
+    } catch (error) {
+      console.error("Failed to check system status:", error);
+    }
+  };
 
   const checkSession = async () => {
     try {
@@ -117,8 +129,12 @@ export default function AdminPage() {
                 <Activity className="h-4 w-4 text-muted-foreground" />
               </CardHeader>
               <CardContent>
-                <div className="text-2xl font-bold text-green-600">Healthy</div>
-                <p className="text-xs text-muted-foreground">All systems operational</p>
+                <div className={`text-2xl font-bold ${systemStatus === "on" ? "text-green-600" : "text-red-600"}`}>
+                  {systemStatus === "on" ? "Healthy" : "Poweroff"}
+                </div>
+                <p className="text-xs text-muted-foreground">
+                  {systemStatus === "on" ? "All systems operational" : "System powered off"}
+                </p>
               </CardContent>
             </Card>
           </div>

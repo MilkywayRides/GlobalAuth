@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { getShutdownState } from "@/lib/shutdown-state";
+import { isSystemOn } from "@/lib/shutdown-state";
 
 export async function checkEmergencyShutdown(request: NextRequest): Promise<NextResponse | null> {
   const { pathname } = request.nextUrl;
@@ -24,12 +24,10 @@ export async function checkEmergencyShutdown(request: NextRequest): Promise<Next
     pathname.startsWith("/signup") ||
     pathname.startsWith("/oauth");
 
-  if (isAuthEndpoint && await getShutdownState()) {
+  if (isAuthEndpoint && !(await isSystemOn())) {
     return NextResponse.json(
       { 
-        error: "Service temporarily unavailable", 
-        message: "Authentication services are currently under maintenance. Please try again later.",
-        code: "EMERGENCY_SHUTDOWN"
+        error: "System is powered off by the BlazeNeuro Team. Please contact administrator."
       },
       { status: 503 }
     );

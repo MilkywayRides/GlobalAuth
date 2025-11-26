@@ -13,6 +13,7 @@ import {
   AlertDialogTitle 
 } from "@/components/ui/alert-dialog";
 import { AlertTriangle, Shield } from "lucide-react";
+import { toast } from "sonner";
 
 export function EmergencyShutdown() {
   const [isShutdown, setIsShutdown] = useState(false);
@@ -52,9 +53,22 @@ export function EmergencyShutdown() {
 
       if (response.ok) {
         setIsShutdown(pendingState);
+        
+        if (pendingState) {
+          toast.error("Services Shutdown", {
+            description: "All authentication services have been disabled by BlazeNeuro.",
+            duration: 5000,
+          });
+        } else {
+          toast.success("Services Restored", {
+            description: "All authentication services have been restored by BlazeNeuro.",
+            duration: 5000,
+          });
+        }
       }
     } catch (error) {
       console.error("Failed to toggle shutdown:", error);
+      toast.error("Failed to update system status");
     } finally {
       setLoading(false);
       setShowDialog(false);
@@ -97,28 +111,30 @@ export function EmergencyShutdown() {
               <AlertTriangle className="h-5 w-5 text-destructive" />
               {pendingState ? "Emergency Shutdown" : "Restore Services"}
             </AlertDialogTitle>
-            <AlertDialogDescription>
-              {pendingState ? (
-                <>
-                  This will immediately disable ALL authentication services including:
-                  <ul className="mt-2 ml-4 list-disc space-y-1">
-                    <li>User login/signup</li>
-                    <li>OAuth authentication</li>
-                    <li>API key access</li>
-                    <li>All user endpoints</li>
-                  </ul>
-                  <span className="mt-2 font-medium block">
-                    Only admin panel will remain accessible. This action should only be used in emergencies.
-                  </span>
-                </>
-              ) : (
-                <>
-                  Are you sure you want to restore all authentication services?
-                  <span className="mt-2 block">
-                    This will re-enable all login, signup, and API access.
-                  </span>
-                </>
-              )}
+            <AlertDialogDescription asChild>
+              <div>
+                {pendingState ? (
+                  <>
+                    <p>This will immediately disable ALL authentication services including:</p>
+                    <ul className="mt-2 ml-4 list-disc space-y-1">
+                      <li>User login/signup</li>
+                      <li>OAuth authentication</li>
+                      <li>API key access</li>
+                      <li>All user endpoints</li>
+                    </ul>
+                    <p className="mt-2 font-medium">
+                      Only admin panel will remain accessible. This action should only be used in emergencies.
+                    </p>
+                  </>
+                ) : (
+                  <>
+                    <p>Are you sure you want to restore all authentication services?</p>
+                    <p className="mt-2">
+                      This will re-enable all login, signup, and API access.
+                    </p>
+                  </>
+                )}
+              </div>
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>

@@ -3,8 +3,30 @@ import { E2EEncryption } from '@/lib/encryption';
 import { db } from '@/lib/db';
 import { applications, oauthTokens } from '@/lib/db/schema';
 import { eq } from 'drizzle-orm';
+import { isSystemOn } from '@/lib/shutdown-state';
+import { auth } from '@/lib/auth';
+import { headers } from 'next/headers';
 
 export async function POST(request: NextRequest) {
+  // Check shutdown status first
+  const systemOn = await isSystemOn();
+  if (!systemOn) {
+    // Check if user is admin
+    try {
+      const session = await auth.api.getSession({
+        headers: await headers(),
+      });
+      if (!session?.user || session.user.role !== 'admin') {
+        return NextResponse.json({ 
+          error: 'System is powered off by the BlazeNeuro Team. Please contact administrator.'
+        }, { status: 503 });
+      }
+    } catch (error) {
+      return NextResponse.json({ 
+        error: 'System is powered off by the BlazeNeuro Team. Please contact administrator.'
+      }, { status: 503 });
+    }
+  }
   try {
     const body = await request.json();
     const { code, client_id, redirect_uri } = body;
