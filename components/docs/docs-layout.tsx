@@ -1,5 +1,6 @@
 "use client";
 
+import 'fumadocs-ui/style.css';
 import { DocsLayout as FumaDocsLayout } from 'fumadocs-ui/layouts/docs';
 import { RootProvider } from 'fumadocs-ui/provider';
 import { getAllDocs, getCategories } from "@/lib/docs";
