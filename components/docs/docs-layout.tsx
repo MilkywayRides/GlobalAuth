@@ -38,8 +38,20 @@ export function DocsLayout({ children }: { children: React.ReactNode }) {
     }),
   };
 
+  // Create search index for Fumadocs
+  const searchIndex = docs.map(doc => ({
+    title: doc.title,
+    description: doc.description,
+    url: `/docs/${doc.slug}`,
+    keywords: [doc.category, ...doc.sections.map(s => s.title)],
+  }));
+
   return (
-    <RootProvider>
+    <RootProvider
+      search={{
+        enabled: true,
+      }}
+    >
       <FumaDocsLayout
         tree={tree}
         nav={{
