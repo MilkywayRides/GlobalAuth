@@ -1,7 +1,7 @@
 "use client";
 
 import { useSearchParams } from 'next/navigation';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, Suspense } from 'react';
 import { authClient } from '@/lib/auth-client';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -9,7 +9,7 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Separator } from '@/components/ui/separator';
 import { Check, Loader2 } from 'lucide-react';
 
-export default function AuthorizePage() {
+function AuthorizeContent() {
   const searchParams = useSearchParams();
   const [isLoading, setIsLoading] = useState(false);
   const [isCheckingAuth, setIsCheckingAuth] = useState(true);
@@ -41,14 +41,12 @@ export default function AuthorizePage() {
     
     const authCode = 'auth_' + Math.random().toString(36).substring(2, 15);
     
-    // Encrypt user data using simple browser-compatible encryption
     const userData = {
       user: session.user,
       scope: scope,
       clientId: clientId
     };
     
-    // Use simple encryption that works in browser
     const { E2EEncryption } = await import('@/lib/encryption');
     const encryptedData = E2EEncryption.encryptOAuthData(userData);
     const fullAuthCode = authCode + '.' + encryptedData;
@@ -57,7 +55,6 @@ export default function AuthorizePage() {
     callbackUrl.searchParams.set('code', fullAuthCode);
     callbackUrl.searchParams.set('state', state!);
     
-    console.log('Redirecting with encrypted auth code');
     window.location.href = callbackUrl.toString();
   };
 
@@ -124,7 +121,6 @@ export default function AuthorizePage() {
         </CardHeader>
         
         <CardContent className="space-y-6">
-          {/* User Info */}
           <div className="flex items-center space-x-3 rounded-lg bg-muted p-3">
             <Avatar>
               <AvatarImage 
@@ -143,7 +139,6 @@ export default function AuthorizePage() {
 
           <Separator />
 
-          {/* Permissions */}
           <div>
             <h3 className="font-semibold text-sm mb-3">This app will be able to:</h3>
             <div className="space-y-2">
@@ -158,7 +153,6 @@ export default function AuthorizePage() {
             </div>
           </div>
 
-          {/* Actions */}
           <div className="flex space-x-3">
             <Button 
               variant="outline" 
@@ -186,5 +180,20 @@ export default function AuthorizePage() {
         </CardContent>
       </Card>
     </div>
+  );
+}
+
+export default function AuthorizePage() {
+  return (
+    <Suspense fallback={
+      <div className="min-h-screen flex items-center justify-center bg-background">
+        <div className="flex items-center space-x-2">
+          <Loader2 className="h-4 w-4 animate-spin" />
+          <span className="text-sm text-muted-foreground">Loading...</span>
+        </div>
+      </div>
+    }>
+      <AuthorizeContent />
+    </Suspense>
   );
 }
