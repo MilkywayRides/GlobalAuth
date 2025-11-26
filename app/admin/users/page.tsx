@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
 import { authClient } from "@/lib/auth-client";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { AppSidebar } from "@/components/app-sidebar";
@@ -11,6 +12,7 @@ import { PageLoadingSpinner } from "@/components/ui/loading-spinner";
 import { columns } from "./columns";
 
 export default function UsersPage() {
+    const router = useRouter();
     const [users, setUsers] = useState<any[]>([]);
     const [loading, setLoading] = useState(true);
     const [session, setSession] = useState<any>(null);
@@ -93,7 +95,11 @@ export default function UsersPage() {
                             <CardDescription>All registered users</CardDescription>
                         </CardHeader>
                         <CardContent>
-                            <DataTable columns={columns} data={users} />
+                            <DataTable 
+                                columns={columns} 
+                                data={users}
+                                onRowClick={(user: any) => router.push(`/admin/users/${user.id}`)}
+                            />
                         </CardContent>
                     </Card>
                 </div>
