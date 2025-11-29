@@ -63,7 +63,13 @@ class LoginActivity : AppCompatActivity() {
                         preferenceManager.saveUser(body.user, body.token)
                         
                         Toast.makeText(this@LoginActivity, "Login successful!", Toast.LENGTH_SHORT).show()
-                        startActivity(Intent(this@LoginActivity, DashboardActivity::class.java))
+                        
+                        // Check email verification
+                        if (body.user.emailVerified) {
+                            startActivity(Intent(this@LoginActivity, DashboardActivity::class.java))
+                        } else {
+                            startActivity(Intent(this@LoginActivity, EmailVerificationActivity::class.java))
+                        }
                         finish()
                     } else {
                         Toast.makeText(this@LoginActivity, 

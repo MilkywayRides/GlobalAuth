@@ -3,7 +3,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:fillViewport="true"
-    android:background="#FFFFFF">
+    android:background="@color/background">
 
     <LinearLayout
         android:layout_width="match_parent"
@@ -18,7 +18,7 @@
             android:layout_height="80dp"
             android:layout_marginTop="48dp"
             android:src="@drawable/ic_qr_code_large"
-            android:tint="#6200EE" />
+            android:tint="@color/foreground" />
 
         <!-- Title -->
         <TextView
@@ -28,7 +28,7 @@
             android:text="Verify Your Email"
             android:textSize="28sp"
             android:textStyle="bold"
-            android:textColor="#000000" />
+            android:textColor="@color/foreground" />
 
         <!-- Description -->
         <TextView
@@ -37,7 +37,7 @@
             android:layout_marginTop="16dp"
             android:text="We sent a verification link to"
             android:textSize="16sp"
-            android:textColor="#666666"
+            android:textColor="@color/muted_foreground"
             android:gravity="center" />
 
         <!-- Email -->
@@ -48,7 +48,7 @@
             android:layout_marginTop="8dp"
             android:textSize="16sp"
             android:textStyle="bold"
-            android:textColor="#6200EE"
+            android:textColor="@color/foreground"
             android:gravity="center" />
 
         <!-- Instructions Card -->
@@ -66,7 +66,7 @@
                 android:text="📧 Check your inbox"
                 android:textSize="16sp"
                 android:textStyle="bold"
-                android:textColor="#000000" />
+                android:textColor="@color/foreground" />
 
             <TextView
                 android:layout_width="match_parent"
@@ -74,7 +74,7 @@
                 android:layout_marginTop="8dp"
                 android:text="Click the verification link in the email to activate your account."
                 android:textSize="14sp"
-                android:textColor="#666666" />
+                android:textColor="@color/muted_foreground" />
         </LinearLayout>
 
         <!-- Check Status Button -->
@@ -86,7 +86,7 @@
             android:text="Check Status"
             android:textSize="16sp"
             android:textStyle="bold"
-            android:textColor="#FFFFFF"
+            android:textColor="@color/primary_foreground"
             android:background="@drawable/button_primary" />
 
         <!-- Resend Button -->
@@ -97,7 +97,7 @@
             android:layout_marginTop="12dp"
             android:text="Resend Email"
             android:textSize="16sp"
-            android:textColor="#6200EE"
+            android:textColor="@color/secondary_foreground"
             android:background="@drawable/button_secondary" />
 
         <!-- Logout Button -->
@@ -108,7 +108,7 @@
             android:layout_marginTop="12dp"
             android:text="Logout"
             android:textSize="16sp"
-            android:textColor="#FFFFFF"
+            android:textColor="@color/destructive_foreground"
             android:background="@drawable/button_destructive" />
 
         <!-- Help Text -->
@@ -118,7 +118,7 @@
             android:layout_marginTop="24dp"
             android:text="Didn't receive the email? Check your spam folder or click resend."
             android:textSize="12sp"
-            android:textColor="#999999"
+            android:textColor="@color/muted_foreground"
             android:gravity="center" />
 
     </LinearLayout>

@@ -58,7 +58,8 @@ export async function POST(req: Request) {
         id: foundUser.id,
         name: foundUser.name,
         email: foundUser.email,
-        role: foundUser.role || 'user'
+        role: foundUser.role || 'user',
+        emailVerified: foundUser.emailVerified || false
       },
       token: sessionToken
     });

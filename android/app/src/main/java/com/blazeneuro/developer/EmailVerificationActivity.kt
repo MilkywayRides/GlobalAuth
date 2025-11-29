@@ -23,6 +23,15 @@ class EmailVerificationActivity : AppCompatActivity() {
         setContentView(binding.root)
         
         preferenceManager = PreferenceManager(this)
+        
+        // Check if already verified
+        val user = preferenceManager.getUser()
+        if (user?.emailVerified == true) {
+            startActivity(Intent(this, DashboardActivity::class.java))
+            finish()
+            return
+        }
+        
         setupUI()
         startResendTimer()
         checkVerificationStatus()
