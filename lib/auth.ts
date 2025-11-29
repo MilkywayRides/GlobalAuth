@@ -12,7 +12,7 @@ export const auth = betterAuth({
   }),
   emailAndPassword: {
     enabled: true,
-    requireEmailVerification: true,
+    requireEmailVerification: false,
     sendVerificationEmail: async ({ user, url, token }: { user: any; url: string; token: string }) => {
       const otp = token.slice(0, 6).toUpperCase();
       
