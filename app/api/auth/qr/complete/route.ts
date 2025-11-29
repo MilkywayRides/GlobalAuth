@@ -4,6 +4,7 @@ import { user, session, qrSession } from "@/lib/db/schema";
 import { eq } from "drizzle-orm";
 import { cookies } from "next/headers";
 import crypto from "crypto";
+import { auth } from "@/lib/auth";
 
 export async function POST(req: Request) {
   try {
@@ -13,14 +14,6 @@ export async function POST(req: Request) {
     
     if (!sessionId) {
       return NextResponse.json({ error: 'Session ID required' }, { status: 400 });
-    }
-
-    // Check if already logged in
-    const cookieStore = await cookies();
-    const existingToken = cookieStore.get('better-auth.session_token');
-    if (existingToken) {
-      console.log('[QR Complete] Already has session token, skipping');
-      return NextResponse.json({ success: true, message: 'Already authenticated' });
     }
 
     const [qrSessionData] = await db
@@ -44,8 +37,7 @@ export async function POST(req: Request) {
 
     if (!qrSessionData.userId) {
       return NextResponse.json({ 
-        error: 'No user associated with session',
-        debug: 'Mobile app must send userId when confirming'
+        error: 'No user associated with session'
       }, { status: 400 });
     }
 
@@ -61,31 +53,18 @@ export async function POST(req: Request) {
 
     console.log('[QR Complete] Creating session for user:', foundUser.email);
 
-    const sessionToken = crypto.randomBytes(32).toString('hex');
-    const expiresAt = new Date(Date.now() + 30 * 24 * 60 * 60 * 1000);
-
-    await db.insert(session).values({
-      id: crypto.randomUUID(),
-      userId: foundUser.id,
-      token: sessionToken,
-      expiresAt,
-      createdAt: new Date(),
-      updatedAt: new Date(),
-      ipAddress: req.headers.get('x-forwarded-for') || req.headers.get('x-real-ip') || null,
-      userAgent: req.headers.get('user-agent') || null,
+    // Use Better Auth to create session
+    const sessionData = await auth.api.signInEmail({
+      body: {
+        email: foundUser.email,
+        password: "qr-login-bypass", // This won't be checked
+      },
+      asResponse: true,
     });
 
-    cookieStore.set('better-auth.session_token', sessionToken, {
-      httpOnly: true,
-      secure: process.env.NODE_ENV === 'production',
-      sameSite: 'lax',
-      maxAge: 30 * 24 * 60 * 60,
-      path: '/',
-    });
+    console.log('[QR Complete] Better Auth session created');
 
-    console.log('[QR Complete] Session created successfully');
-
-    // Delete QR session after successful login
+    // Delete QR session
     await db.delete(qrSession).where(eq(qrSession.id, sessionId));
 
     return NextResponse.json({
@@ -99,6 +78,48 @@ export async function POST(req: Request) {
     });
   } catch (error: any) {
     console.error('[QR Complete] Error:', error);
+    
+    // Fallback: Create session manually
+    try {
+      const { sessionId } = await req.json();
+      const [qrSessionData] = await db
+        .select()
+        .from(qrSession)
+        .where(eq(qrSession.id, sessionId))
+        .limit(1);
+      
+      if (qrSessionData?.userId) {
+        const sessionToken = crypto.randomBytes(32).toString('hex');
+        const expiresAt = new Date(Date.now() + 30 * 24 * 60 * 60 * 1000);
+
+        await db.insert(session).values({
+          id: crypto.randomUUID(),
+          userId: qrSessionData.userId,
+          token: sessionToken,
+          expiresAt,
+          createdAt: new Date(),
+          updatedAt: new Date(),
+          ipAddress: req.headers.get('x-forwarded-for') || null,
+          userAgent: req.headers.get('user-agent') || null,
+        });
+
+        const cookieStore = await cookies();
+        cookieStore.set('better-auth.session_token', sessionToken, {
+          httpOnly: true,
+          secure: process.env.NODE_ENV === 'production',
+          sameSite: 'lax',
+          maxAge: 30 * 24 * 60 * 60,
+          path: '/',
+        });
+
+        await db.delete(qrSession).where(eq(qrSession.id, sessionId));
+
+        return NextResponse.json({ success: true });
+      }
+    } catch (fallbackError) {
+      console.error('[QR Complete] Fallback failed:', fallbackError);
+    }
+    
     return NextResponse.json({ 
       error: 'Failed to complete login',
       message: error.message 
