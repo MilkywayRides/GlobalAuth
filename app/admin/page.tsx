@@ -39,8 +39,13 @@ export default function AdminPage() {
         return;
       }
 
+      if (!data.user.emailVerified) {
+        window.location.href = "/verify-email";
+        return;
+      }
+
       if (data.user.role !== "admin") {
-        window.location.href = "/";
+        window.location.href = "/dashboard";
         return;
       }
 

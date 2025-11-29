@@ -1,54 +1,43 @@
-import { NextRequest, NextResponse } from 'next/server';
-import { isSystemOn } from '@/lib/shutdown-state';
+import { NextResponse } from 'next/server'
+import type { NextRequest } from 'next/server'
+import { auth } from './lib/auth'
 
 export async function middleware(request: NextRequest) {
-  const { pathname } = request.nextUrl;
+  const path = request.nextUrl.pathname
 
-  // Handle preflight requests first
-  if (request.method === 'OPTIONS') {
-    return new NextResponse(null, {
-      status: 200,
-      headers: {
-        'Access-Control-Allow-Origin': '*',
-        'Access-Control-Allow-Methods': 'GET, POST, PUT, DELETE, OPTIONS',
-        'Access-Control-Allow-Headers': 'Content-Type, Authorization',
-      },
-    });
-  }
+  // Admin routes protection
+  if (path.startsWith('/admin')) {
+    const session = await auth.api.getSession({ headers: request.headers })
+    
+    if (!session?.user) {
+      return NextResponse.redirect(new URL('/login', request.url))
+    }
 
-  // Check system status - allow only admin routes when powered off
-  if (!pathname.startsWith('/admin') && !pathname.startsWith('/api/admin')) {
-    const systemOn = await isSystemOn();
-    if (!systemOn) {
-      return NextResponse.json(
-        { error: "System is powered off by the BlazeNeuro Team. Please contact administrator." },
-        { status: 503 }
-      );
+    if (!session.user.emailVerified) {
+      return NextResponse.redirect(new URL('/verify-email', request.url))
+    }
+
+    if (session.user.role !== 'admin') {
+      return NextResponse.redirect(new URL('/dashboard', request.url))
     }
   }
 
-  // Create response
-  const response = NextResponse.next();
-  
-  // CORS headers for API routes
-  if (pathname.startsWith('/api/')) {
-    response.headers.set('Access-Control-Allow-Origin', '*');
-    response.headers.set('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
-    response.headers.set('Access-Control-Allow-Headers', 'Content-Type, Authorization');
-  }
-  
-  // Security headers
-  response.headers.set('X-DNS-Prefetch-Control', 'on');
-  response.headers.set('X-Frame-Options', 'DENY');
-  response.headers.set('X-Content-Type-Options', 'nosniff');
-  response.headers.set('Referrer-Policy', 'strict-origin-when-cross-origin');
+  // Dashboard routes - require email verification
+  if (path.startsWith('/dashboard')) {
+    const session = await auth.api.getSession({ headers: request.headers })
+    
+    if (!session?.user) {
+      return NextResponse.redirect(new URL('/login', request.url))
+    }
 
-  return response;
+    if (!session.user.emailVerified) {
+      return NextResponse.redirect(new URL('/verify-email', request.url))
+    }
+  }
+
+  return NextResponse.next()
 }
 
 export const config = {
-  matcher: [
-    '/api/:path*',
-    '/((?!_next/static|_next/image|favicon.ico).*)',
-  ],
-};
+  matcher: ['/admin/:path*', '/dashboard/:path*'],
+}
