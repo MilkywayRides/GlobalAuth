@@ -2,8 +2,8 @@ import { NextResponse } from "next/server";
 import { auth } from "@/lib/auth";
 import { headers } from "next/headers";
 import { db } from "@/lib/db";
-import { session, user } from "@/lib/db/schema";
-import { sql } from "drizzle-orm";
+import { session, user, oauthTokens } from "@/lib/db/schema";
+import { sql, eq } from "drizzle-orm";
 
 interface LocationData {
   country: string;
@@ -23,21 +23,22 @@ export async function GET() {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    // Get all unique IP addresses from all sessions
+    // Get all unique IP addresses from sessions of users who have OAuth tokens (authenticated through OAuth)
     const sessions = await db
       .select({
         ipAddress: session.ipAddress,
         count: sql<number>`count(*)::int`,
       })
       .from(session)
+      .innerJoin(oauthTokens, eq(session.userId, oauthTokens.userId))
       .where(sql`${session.ipAddress} IS NOT NULL AND ${session.ipAddress} != ''`)
       .groupBy(session.ipAddress)
       .limit(200);
 
-    // Get total user count
+    // Get total OAuth authenticated users count
     const totalUsersResult = await db
-      .select({ count: sql<number>`count(*)::int` })
-      .from(user);
+      .select({ count: sql<number>`count(DISTINCT ${oauthTokens.userId})::int` })
+      .from(oauthTokens);
     const totalUsers = totalUsersResult[0]?.count || 0;
 
     // Fetch geolocation data for each IP
