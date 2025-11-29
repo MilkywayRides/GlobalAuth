@@ -1,10 +1,10 @@
 "use server";
 
 import { db } from "@/lib/db";
-import { qrSession, user } from "@/lib/db/schema";
+import { qrSession, user, session } from "@/lib/db/schema";
 import { eq } from "drizzle-orm";
-import { auth } from "@/lib/auth";
 import { cookies } from "next/headers";
+import crypto from "crypto";
 
 export async function completeQRLogin(sessionId: string) {
   try {
@@ -28,13 +28,31 @@ export async function completeQRLogin(sessionId: string) {
       return { success: false, error: 'User not found' };
     }
 
-    // Use Better Auth's setSession to create a proper session
-    await auth.api.setSession({
-      session: {
-        userId: foundUser.id,
-        expiresAt: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000),
-      },
-      user: foundUser,
+    // Create session token
+    const sessionToken = crypto.randomBytes(32).toString('hex');
+    const expiresAt = new Date(Date.now() + 30 * 24 * 60 * 60 * 1000);
+    const now = new Date();
+
+    // Insert session
+    await db.insert(session).values({
+      id: crypto.randomUUID(),
+      userId: foundUser.id,
+      token: sessionToken,
+      expiresAt,
+      createdAt: now,
+      updatedAt: now,
+      ipAddress: null,
+      userAgent: null,
+    });
+
+    // Set cookie
+    const cookieStore = await cookies();
+    cookieStore.set('better-auth.session_token', sessionToken, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: 'lax',
+      maxAge: 30 * 24 * 60 * 60,
+      path: '/',
     });
 
     // Delete QR session
