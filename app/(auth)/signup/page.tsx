@@ -21,7 +21,12 @@ export default function SignupPage() {
 
   useEffect(() => {
     if (!isPending && session) {
-      router.push("/dashboard");
+      // Redirect to verify-email if not verified, otherwise dashboard
+      if (session.user.emailVerified) {
+        router.push("/dashboard");
+      } else {
+        router.push("/verify-email");
+      }
     }
   }, [session, isPending, router]);
 

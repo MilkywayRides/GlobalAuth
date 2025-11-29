@@ -15,8 +15,6 @@ export const auth = betterAuth({
     requireEmailVerification: false,
     autoSignIn: true,
     sendVerificationEmail: async ({ user, url, token }: { user: any; url: string; token: string }) => {
-      const otp = token.slice(0, 6).toUpperCase();
-      
       try {
         await resend.emails.send({
           from: "BlazeNeuro <noreply@blazeneuro.com>",
@@ -24,15 +22,14 @@ export const auth = betterAuth({
           subject: "Verify your email - BlazeNeuro",
           html: `
             <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
-              <h2>Verify Your Email</h2>
+              <h2>Welcome to BlazeNeuro!</h2>
               <p>Hi ${user.name || 'there'},</p>
-              <p>Your verification code is:</p>
-              <div style="background: #f4f4f4; padding: 20px; text-align: center; font-size: 32px; font-weight: bold; letter-spacing: 5px; margin: 20px 0;">
-                ${otp}
-              </div>
-              <p>Or click the link below to verify:</p>
-              <a href="${url}" style="display: inline-block; background: #000; color: #fff; padding: 12px 24px; text-decoration: none; border-radius: 5px;">Verify Email</a>
-              <p style="color: #666; font-size: 14px; margin-top: 20px;">This code expires in 10 minutes.</p>
+              <p>Thank you for signing up. Please verify your email address to get started:</p>
+              <a href="${url}" style="display: inline-block; background: #000; color: #fff; padding: 12px 24px; text-decoration: none; border-radius: 5px; margin: 20px 0;">Verify Email</a>
+              <p style="color: #666; font-size: 14px; margin-top: 20px;">
+                This link expires in 10 minutes.<br/>
+                If you didn't create an account, please ignore this email.
+              </p>
             </div>
           `,
         });

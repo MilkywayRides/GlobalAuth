@@ -23,6 +23,12 @@ export default function LoginPage() {
 
   useEffect(() => {
     if (!isPending && session) {
+      // Check email verification first
+      if (!session.user.emailVerified) {
+        router.push("/verify-email");
+        return;
+      }
+      
       // Allow admin access even during shutdown
       if (session.user.role === 'admin' || !isShutdown) {
         router.push("/dashboard");
