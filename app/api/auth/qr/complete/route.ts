@@ -15,6 +15,14 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: 'Session ID required' }, { status: 400 });
     }
 
+    // Check if already logged in
+    const cookieStore = await cookies();
+    const existingToken = cookieStore.get('better-auth.session_token');
+    if (existingToken) {
+      console.log('[QR Complete] Already has session token, skipping');
+      return NextResponse.json({ success: true, message: 'Already authenticated' });
+    }
+
     const [qrSessionData] = await db
       .select()
       .from(qrSession)
@@ -67,7 +75,6 @@ export async function POST(req: Request) {
       userAgent: req.headers.get('user-agent') || null,
     });
 
-    const cookieStore = await cookies();
     cookieStore.set('better-auth.session_token', sessionToken, {
       httpOnly: true,
       secure: process.env.NODE_ENV === 'production',
@@ -78,6 +85,7 @@ export async function POST(req: Request) {
 
     console.log('[QR Complete] Session created successfully');
 
+    // Delete QR session after successful login
     await db.delete(qrSession).where(eq(qrSession.id, sessionId));
 
     return NextResponse.json({
