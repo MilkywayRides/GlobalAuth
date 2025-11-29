@@ -63,7 +63,7 @@ export function SignupForm() {
 
       if (result.data) {
         // Verification email is sent automatically by Better Auth
-        router.push("/dashboard");
+        router.push("/verify-email");
       }
     } catch (error: any) {
       setError(error.message || "Signup failed. Please try again.");

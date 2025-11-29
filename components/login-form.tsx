@@ -37,7 +37,13 @@ export function LoginForm() {
       }
 
       if (result.data) {
-        router.push("/dashboard");
+        // Check if email is verified
+        const session = await authClient.getSession();
+        if (session.data?.user && !session.data.user.emailVerified) {
+          router.push("/verify-email");
+        } else {
+          router.push("/dashboard");
+        }
       }
     } catch (error: any) {
       setError(error.message || "Login failed. Please check your credentials.");

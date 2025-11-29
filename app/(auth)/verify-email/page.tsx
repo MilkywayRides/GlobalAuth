@@ -14,13 +14,26 @@ export default function VerifyEmailPage() {
   const [otp, setOtp] = useState("");
   const [loading, setLoading] = useState(false);
   const [resending, setResending] = useState(false);
+  const [checkingSession, setCheckingSession] = useState(true);
   const router = useRouter();
   const { data: session } = authClient.useSession();
 
   useEffect(() => {
-    if (session?.user?.emailVerified) {
-      router.push("/dashboard");
-    }
+    const checkVerification = async () => {
+      if (!session?.user) {
+        router.push("/login");
+        return;
+      }
+      
+      if (session.user.emailVerified) {
+        router.push("/dashboard");
+        return;
+      }
+      
+      setCheckingSession(false);
+    };
+    
+    checkVerification();
   }, [session, router]);
 
   const handleVerify = async (e: React.FormEvent) => {
@@ -28,8 +41,15 @@ export default function VerifyEmailPage() {
     setLoading(true);
 
     try {
-      await authClient.verifyEmail({ query: { token: otp } });
+      await authClient.verifyEmail({ 
+        query: { token: otp }
+      });
+      
       toast.success("Email verified successfully!");
+      
+      // Refresh session to get updated emailVerified status
+      await authClient.getSession();
+      
       router.push("/dashboard");
     } catch (error: any) {
       toast.error(error.message || "Invalid verification code");
@@ -41,7 +61,10 @@ export default function VerifyEmailPage() {
   const handleResend = async () => {
     setResending(true);
     try {
-      await authClient.sendVerificationEmail({ email: session?.user?.email || "" });
+      await authClient.sendVerificationEmail({ 
+        email: session?.user?.email || "",
+        callbackURL: "/verify-email"
+      });
       toast.success("Verification email sent!");
     } catch (error: any) {
       toast.error(error.message || "Failed to resend email");
@@ -49,6 +72,14 @@ export default function VerifyEmailPage() {
       setResending(false);
     }
   };
+
+  if (checkingSession) {
+    return (
+      <div className="flex min-h-screen items-center justify-center">
+        <Loader2 className="h-8 w-8 animate-spin" />
+      </div>
+    );
+  }
 
   return (
     <div className="flex min-h-screen items-center justify-center p-4">
