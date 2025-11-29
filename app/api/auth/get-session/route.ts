@@ -22,9 +22,6 @@ export async function GET() {
         email: session.user.email,
         emailVerified: session.user.emailVerified || false,
         role: session.user.role || 'user'
-      },
-      session: {
-        expiresAt: session.expiresAt
       }
     });
   } catch (error) {
