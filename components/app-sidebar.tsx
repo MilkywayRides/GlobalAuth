@@ -39,6 +39,11 @@ export function AppSidebar({ user, ...props }: React.ComponentProps<typeof Sideb
       icon: IconDashboard,
     },
     {
+      title: "Globe",
+      url: "/admin/globe",
+      icon: IconDashboard,
+    },
+    {
       title: "Users",
       url: "/admin/users",
       icon: IconUsers,
@@ -58,6 +63,11 @@ export function AppSidebar({ user, ...props }: React.ComponentProps<typeof Sideb
     {
       title: "Dashboard",
       url: "/dashboard",
+      icon: IconDashboard,
+    },
+    {
+      title: "Globe",
+      url: "/dashboard/globe",
       icon: IconDashboard,
     },
     {
