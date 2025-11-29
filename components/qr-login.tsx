@@ -121,11 +121,16 @@ export function QRLogin() {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ sessionId }),
-              }).then(() => {
-                setTimeout(() => {
+              }).then(async (response) => {
+                if (response.ok) {
+                  // Force reload to get new session
                   window.location.href = '/dashboard';
-                }, 500);
-              }).catch(() => {
+                } else {
+                  console.error('Complete failed:', await response.text());
+                  window.location.reload();
+                }
+              }).catch((error) => {
+                console.error('Complete error:', error);
                 window.location.reload();
               });
             }
