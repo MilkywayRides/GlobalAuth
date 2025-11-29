@@ -29,7 +29,6 @@ import {
     Clock,
     Shield
 } from "lucide-react"
-import data from "@/components/dashboard-data.json"
 
 export default function DashboardPage() {
     const { data: session, isPending } = authClient.useSession()
@@ -43,6 +42,7 @@ export default function DashboardPage() {
     const [analyticsData, setAnalyticsData] = useState<any>(null)
     const [apiKeys, setApiKeys] = useState<any[]>([])
     const [topApiKeys, setTopApiKeys] = useState<any[]>([])
+    const [realtimeUsers, setRealtimeUsers] = useState<any[]>([])
     const [isLoading, setIsLoading] = useState(true)
 
     useEffect(() => {
@@ -54,9 +54,10 @@ export default function DashboardPage() {
     useEffect(() => {
         const fetchData = async () => {
             try {
-                const [analyticsRes, keysRes] = await Promise.all([
+                const [analyticsRes, keysRes, usersRes] = await Promise.all([
                     fetch('/api/analytics'),
-                    fetch('/api/keys')
+                    fetch('/api/keys'),
+                    fetch('/api/realtime-users')
                 ])
 
                 if (analyticsRes.ok) {
@@ -81,6 +82,12 @@ export default function DashboardPage() {
                         activeKeys: keysData.keys?.filter((k: any) => k.isActive).length || 0
                     }))
                 }
+
+                if (usersRes.ok) {
+                    const usersData = await usersRes.json()
+                    console.log('Realtime users data:', usersData)
+                    setRealtimeUsers(usersData.users || [])
+                }
             } catch (error) {
                 console.error('Failed to fetch data:', error)
             } finally {
@@ -90,6 +97,14 @@ export default function DashboardPage() {
 
         if (session) {
             fetchData()
+            // Poll for realtime users every 5 seconds
+            const interval = setInterval(() => {
+                fetch('/api/realtime-users')
+                    .then(res => res.json())
+                    .then(data => setRealtimeUsers(data.users || []))
+                    .catch(console.error)
+            }, 5000)
+            return () => clearInterval(interval)
         }
     }, [session, isPending])
 
@@ -134,100 +149,27 @@ export default function DashboardPage() {
                                     </p>
                                 </div>
 
-                                {/* Quick Stats Cards */}
-                                <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4 mb-6">
-                                    <Card className="border-l-4 border-l-blue-500">
-                                        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                                            <CardTitle className="text-sm font-medium">
-                                                API Requests
-                                            </CardTitle>
-                                            <BarChart3 className="h-4 w-4 text-muted-foreground" />
-                                        </CardHeader>
-                                        <CardContent>
-                                            <div className="text-2xl font-bold">{apiStats.totalRequests.toLocaleString()}</div>
-                                            <p className="text-xs text-muted-foreground">
-                                                {apiStats.totalRequests > 0 ? (
-                                                    <>
-                                                        <TrendingUp className="inline h-3 w-3 mr-1" />
-                                                        Total requests tracked
-                                                    </>
-                                                ) : (
-                                                    "No requests yet"
-                                                )}
-                                            </p>
-                                        </CardContent>
-                                    </Card>
-
-                                    <Card className="border-l-4 border-l-green-500">
-                                        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                                            <CardTitle className="text-sm font-medium">
-                                                Success Rate
-                                            </CardTitle>
-                                            <Shield className="h-4 w-4 text-muted-foreground" />
-                                        </CardHeader>
-                                        <CardContent>
-                                            <div className="text-2xl font-bold">{apiStats.successRate}%</div>
-                                            <p className="text-xs text-muted-foreground">
-                                                {apiStats.totalRequests > 0 ? (
-                                                    <>
-                                                        <Activity className="inline h-3 w-3 mr-1" />
-                                                        {apiStats.successRate >= 95 ? "Excellent" : apiStats.successRate >= 80 ? "Good" : "Needs attention"}
-                                                    </>
-                                                ) : (
-                                                    "No data yet"
-                                                )}
-                                            </p>
-                                        </CardContent>
-                                    </Card>
-
-                                    <Card className="border-l-4 border-l-purple-500">
-                                        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                                            <CardTitle className="text-sm font-medium">
-                                                Avg Response Time
-                                            </CardTitle>
-                                            <Zap className="h-4 w-4 text-muted-foreground" />
-                                        </CardHeader>
-                                        <CardContent>
-                                            <div className="text-2xl font-bold">{apiStats.avgResponseTime}ms</div>
-                                            <p className="text-xs text-muted-foreground">
-                                                <Clock className="inline h-3 w-3 mr-1" />
-                                                {apiStats.avgResponseTime > 0 ? "Average response" : "No data"}
-                                            </p>
-                                        </CardContent>
-                                    </Card>
-
-                                    <Card className="border-l-4 border-l-orange-500">
-                                        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                                            <CardTitle className="text-sm font-medium">
-                                                Active API Keys
-                                            </CardTitle>
-                                            <Key className="h-4 w-4 text-muted-foreground" />
-                                        </CardHeader>
-                                        <CardContent>
-                                            <div className="text-2xl font-bold">{apiStats.activeKeys}</div>
-                                            <p className="text-xs text-muted-foreground">
-                                                <Users className="inline h-3 w-3 mr-1" />
-                                                {apiStats.activeKeys > 0 ? `${apiStats.activeKeys} active` : "No keys yet"}
-                                            </p>
-                                        </CardContent>
-                                    </Card>
-                                </div>
                             </div>
 
                             {/* Main Dashboard Tabs */}
                             <div className="px-4 lg:px-6">
                                 <Tabs defaultValue="overview" className="space-y-4">
-                                    <TabsList className="grid w-full grid-cols-4">
-                                        <TabsTrigger value="overview">Overview</TabsTrigger>
-                                        <TabsTrigger value="analytics">Analytics</TabsTrigger>
-                                        <TabsTrigger value="api-keys">API Keys</TabsTrigger>
-                                        <TabsTrigger value="applications">Applications</TabsTrigger>
-                                    </TabsList>
-
                                     <TabsContent value="overview" className="space-y-4">
                                         <SectionCards />
                                         <ChartAreaInteractive />
-                                        <DataTable data={data} />
+                                        <DataTable data={realtimeUsers.map((user, idx) => {
+                                            const transformed = {
+                                                id: idx + 1,
+                                                header: user.name,
+                                                type: user.email,
+                                                status: user.emailVerified ? "Done" : "In Process",
+                                                target: new Date(user.createdAt).toLocaleDateString(),
+                                                limit: new Date(user.createdAt).toLocaleTimeString(),
+                                                reviewer: user.emailVerified ? "Verified" : "Pending"
+                                            }
+                                            console.log('Transformed user:', transformed)
+                                            return transformed
+                                        })} />
                                     </TabsContent>
 
                                     <TabsContent value="analytics" className="space-y-4">
