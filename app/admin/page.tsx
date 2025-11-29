@@ -14,9 +14,10 @@ export default function AdminPage() {
   const [loading, setLoading] = useState(true);
   const [session, setSession] = useState<any>(null);
   const [systemStatus, setSystemStatus] = useState<"on" | "poweroff">("on");
+  const [adminToken, setAdminToken] = useState<string | null>(null);
 
   useEffect(() => {
-    checkSession();
+    validateAdminAccess();
     checkSystemStatus();
   }, []);
 
@@ -30,21 +31,46 @@ export default function AdminPage() {
     }
   };
 
-  const checkSession = async () => {
+  const validateAdminAccess = async () => {
     try {
-      const { data } = await authClient.getSession();
+      // Step 1: Validate session with secure backend check
+      const validationResponse = await fetch("/api/admin/validate", {
+        method: "POST",
+        credentials: "include",
+      });
 
+      const validation = await validationResponse.json();
+
+      if (!validation.authorized) {
+        switch (validation.reason) {
+          case "NO_SESSION":
+            window.location.href = "/login";
+            break;
+          case "EMAIL_NOT_VERIFIED":
+            window.location.href = "/verify-email";
+            break;
+          case "NOT_ADMIN":
+            window.location.href = "/dashboard";
+            break;
+          default:
+            window.location.href = "/login";
+        }
+        return;
+      }
+
+      // Step 2: Store secure token
+      setAdminToken(validation.token);
+
+      // Step 3: Get session data
+      const { data } = await authClient.getSession();
+      
       if (!data?.user) {
         window.location.href = "/login";
         return;
       }
 
-      if (!data.user.emailVerified) {
-        window.location.href = "/verify-email";
-        return;
-      }
-
-      if (data.user.role !== "admin") {
+      // Step 4: Double-check role on client
+      if (data.user.role !== "admin" || !data.user.emailVerified) {
         window.location.href = "/dashboard";
         return;
       }
@@ -52,7 +78,7 @@ export default function AdminPage() {
       setSession(data);
       loadStats();
     } catch (error) {
-      console.error("Session check failed:", error);
+      console.error("Admin validation failed:", error);
       window.location.href = "/login";
     }
   };
@@ -76,8 +102,8 @@ export default function AdminPage() {
     }
   };
 
-  if (loading) {
-    return <PageLoadingSpinner text="Loading admin panel..." />;
+  if (loading || !adminToken) {
+    return <PageLoadingSpinner text="Validating admin access..." />;
   }
 
   const user = session?.user ? {
