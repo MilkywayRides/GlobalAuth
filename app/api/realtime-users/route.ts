@@ -2,8 +2,8 @@ import { NextResponse } from "next/server";
 import { auth } from "@/lib/auth";
 import { headers } from "next/headers";
 import { db } from "@/lib/db";
-import { user } from "@/lib/db/schema";
-import { desc } from "drizzle-orm";
+import { user, oauthTokens, applications } from "@/lib/db/schema";
+import { desc, eq } from "drizzle-orm";
 
 export async function GET() {
   try {
@@ -15,7 +15,7 @@ export async function GET() {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    // Get recent users (last 50)
+    // Get users who authenticated through current user's OAuth apps
     const recentUsers = await db
       .select({
         id: user.id,
@@ -25,6 +25,9 @@ export async function GET() {
         createdAt: user.createdAt,
       })
       .from(user)
+      .innerJoin(oauthTokens, eq(user.id, oauthTokens.userId))
+      .innerJoin(applications, eq(oauthTokens.clientId, applications.clientId))
+      .where(eq(applications.userId, session.user.id))
       .orderBy(desc(user.createdAt))
       .limit(50);
 
