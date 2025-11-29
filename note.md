@@ -1,6 +1,6 @@
 # BlazeNeuro Developer Portal - Build Notes
 
-**Current Version:** 1.0.0
+**Current Version:** 1.0.1
 
 ---
 
@@ -61,6 +61,25 @@ RESEND_API_KEY=re_...
 ---
 
 ## 📝 Changelog
+
+### Version 1.0.1 (2025-11-29)
+**Bug Fixes & Improvements**
+
+#### Fixed:
+- 🐛 Fixed 422 error on signup API endpoint
+- 🐛 Fixed 403 error on login API endpoint
+- 🐛 Added proper error handling for signup/login forms
+- 🐛 Fixed verification email flow after signup
+- 🐛 Added password validation (minimum 8 characters)
+- 🐛 Improved error messages for better user feedback
+- 🐛 Fixed callback URLs for authentication flows
+
+#### Improved:
+- ✨ Added client-side validation before API calls
+- ✨ Better error display in forms
+- ✨ Added password length requirement hint
+- ✨ Redirect to verify-email page after signup
+- ✨ Automatic verification email sending
 
 ### Version 1.0.0 (2025-11-29)
 **Initial Production Release**
@@ -223,4 +242,4 @@ None currently.
 
 ---
 
-**Last Updated:** 2025-11-29 18:47 IST
+**Last Updated:** 2025-11-29 18:49 IST
