@@ -55,7 +55,7 @@ export async function POST(req: NextRequest) {
 
     // Send email
     await resend.emails.send({
-      from: "BlazeNeuro <noreply@blazeneuro.com>",
+      from: "BlazeNeuro <onboarding@resend.dev>",
       to: session.user.email,
       subject: "Verify your email - BlazeNeuro",
       html: `

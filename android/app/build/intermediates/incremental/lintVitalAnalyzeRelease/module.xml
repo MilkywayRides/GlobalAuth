@@ -1,0 +1,19 @@
+<lint-module
+    format="1"
+    dir="/home/ankit/Documents/Code/auth/android/app"
+    name=":app"
+    type="APP"
+    maven="BlazeNeuro Developer:app:"
+    agpVersion="8.2.0"
+    buildFolder="build"
+    bootClassPath="/home/ankit/Android/Sdk/platforms/android-34/android.jar:/home/ankit/Android/Sdk/build-tools/34.0.0/core-lambda-stubs.jar"
+    javaSourceLevel="1.8"
+    compileTarget="android-34"
+    neverShrinking="true">
+  <lintOptions
+      abortOnError="true"
+      absolutePaths="true"
+      checkReleaseBuilds="true"
+      explainIssues="true"/>
+  <variant name="release"/>
+</lint-module>

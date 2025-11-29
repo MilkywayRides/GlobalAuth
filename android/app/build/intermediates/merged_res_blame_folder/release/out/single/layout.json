@@ -1,0 +1,34 @@
+[
+    {
+        "merged": "com.blazeneuro.developer.app-mergeReleaseResources-51:/layout/activity_dashboard.xml",
+        "source": "com.blazeneuro.developer.app-main-53:/layout/activity_dashboard.xml"
+    },
+    {
+        "merged": "com.blazeneuro.developer.app-mergeReleaseResources-51:/layout/activity_qrscan.xml",
+        "source": "com.blazeneuro.developer.app-main-53:/layout/activity_qrscan.xml"
+    },
+    {
+        "merged": "com.blazeneuro.developer.app-mergeReleaseResources-51:/layout/activity_onboarding.xml",
+        "source": "com.blazeneuro.developer.app-main-53:/layout/activity_onboarding.xml"
+    },
+    {
+        "merged": "com.blazeneuro.developer.app-mergeReleaseResources-51:/layout/activity_signup.xml",
+        "source": "com.blazeneuro.developer.app-main-53:/layout/activity_signup.xml"
+    },
+    {
+        "merged": "com.blazeneuro.developer.app-mergeReleaseResources-51:/layout/activity_login.xml",
+        "source": "com.blazeneuro.developer.app-main-53:/layout/activity_login.xml"
+    },
+    {
+        "merged": "com.blazeneuro.developer.app-mergeReleaseResources-51:/layout/item_onboarding.xml",
+        "source": "com.blazeneuro.developer.app-main-53:/layout/item_onboarding.xml"
+    },
+    {
+        "merged": "com.blazeneuro.developer.app-mergeReleaseResources-51:/layout/activity_email_verification.xml",
+        "source": "com.blazeneuro.developer.app-main-53:/layout/activity_email_verification.xml"
+    },
+    {
+        "merged": "com.blazeneuro.developer.app-mergeReleaseResources-51:/layout/activity_main.xml",
+        "source": "com.blazeneuro.developer.app-main-53:/layout/activity_main.xml"
+    }
+]

@@ -70,6 +70,9 @@
             android:name="com.blazeneuro.developer.SignupActivity"
             android:exported="false" />
         <activity
+            android:name="com.blazeneuro.developer.EmailVerificationActivity"
+            android:exported="false" />
+        <activity
             android:name="com.blazeneuro.developer.DashboardActivity"
             android:exported="false" />
         <activity

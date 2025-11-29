@@ -1,0 +1,82 @@
+[
+    {
+        "merged": "com.blazeneuro.developer.app-merged_res-52:/layout_activity_signup.xml.flat",
+        "source": "com.blazeneuro.developer.app-main-53:/layout/activity_signup.xml"
+    },
+    {
+        "merged": "com.blazeneuro.developer.app-merged_res-52:/drawable_ic_qr_code_large.xml.flat",
+        "source": "com.blazeneuro.developer.app-main-53:/drawable/ic_qr_code_large.xml"
+    },
+    {
+        "merged": "com.blazeneuro.developer.app-merged_res-52:/xml_data_extraction_rules.xml.flat",
+        "source": "com.blazeneuro.developer.app-main-53:/xml/data_extraction_rules.xml"
+    },
+    {
+        "merged": "com.blazeneuro.developer.app-merged_res-52:/drawable_circle_background.xml.flat",
+        "source": "com.blazeneuro.developer.app-main-53:/drawable/circle_background.xml"
+    },
+    {
+        "merged": "com.blazeneuro.developer.app-merged_res-52:/drawable_ic_qr_code.xml.flat",
+        "source": "com.blazeneuro.developer.app-main-53:/drawable/ic_qr_code.xml"
+    },
+    {
+        "merged": "com.blazeneuro.developer.app-merged_res-52:/drawable_button_secondary.xml.flat",
+        "source": "com.blazeneuro.developer.app-main-53:/drawable/button_secondary.xml"
+    },
+    {
+        "merged": "com.blazeneuro.developer.app-merged_res-52:/drawable_button_destructive.xml.flat",
+        "source": "com.blazeneuro.developer.app-main-53:/drawable/button_destructive.xml"
+    },
+    {
+        "merged": "com.blazeneuro.developer.app-merged_res-52:/layout_activity_qrscan.xml.flat",
+        "source": "com.blazeneuro.developer.app-main-53:/layout/activity_qrscan.xml"
+    },
+    {
+        "merged": "com.blazeneuro.developer.app-merged_res-52:/layout_activity_dashboard.xml.flat",
+        "source": "com.blazeneuro.developer.app-main-53:/layout/activity_dashboard.xml"
+    },
+    {
+        "merged": "com.blazeneuro.developer.app-merged_res-52:/layout_activity_main.xml.flat",
+        "source": "com.blazeneuro.developer.app-main-53:/layout/activity_main.xml"
+    },
+    {
+        "merged": "com.blazeneuro.developer.app-merged_res-52:/drawable_ic_camera.xml.flat",
+        "source": "com.blazeneuro.developer.app-main-53:/drawable/ic_camera.xml"
+    },
+    {
+        "merged": "com.blazeneuro.developer.app-merged_res-52:/drawable_button_primary.xml.flat",
+        "source": "com.blazeneuro.developer.app-main-53:/drawable/button_primary.xml"
+    },
+    {
+        "merged": "com.blazeneuro.developer.app-merged_res-52:/drawable_input_background.xml.flat",
+        "source": "com.blazeneuro.developer.app-main-53:/drawable/input_background.xml"
+    },
+    {
+        "merged": "com.blazeneuro.developer.app-merged_res-52:/mipmap-anydpi-v26_ic_launcher_round.xml.flat",
+        "source": "com.blazeneuro.developer.app-main-53:/mipmap-anydpi-v26/ic_launcher_round.xml"
+    },
+    {
+        "merged": "com.blazeneuro.developer.app-merged_res-52:/layout_item_onboarding.xml.flat",
+        "source": "com.blazeneuro.developer.app-main-53:/layout/item_onboarding.xml"
+    },
+    {
+        "merged": "com.blazeneuro.developer.app-merged_res-52:/xml_backup_rules.xml.flat",
+        "source": "com.blazeneuro.developer.app-main-53:/xml/backup_rules.xml"
+    },
+    {
+        "merged": "com.blazeneuro.developer.app-merged_res-52:/layout_activity_email_verification.xml.flat",
+        "source": "com.blazeneuro.developer.app-main-53:/layout/activity_email_verification.xml"
+    },
+    {
+        "merged": "com.blazeneuro.developer.app-merged_res-52:/layout_activity_onboarding.xml.flat",
+        "source": "com.blazeneuro.developer.app-main-53:/layout/activity_onboarding.xml"
+    },
+    {
+        "merged": "com.blazeneuro.developer.app-merged_res-52:/layout_activity_login.xml.flat",
+        "source": "com.blazeneuro.developer.app-main-53:/layout/activity_login.xml"
+    },
+    {
+        "merged": "com.blazeneuro.developer.app-merged_res-52:/mipmap-anydpi-v26_ic_launcher.xml.flat",
+        "source": "com.blazeneuro.developer.app-main-53:/mipmap-anydpi-v26/ic_launcher.xml"
+    }
+]
