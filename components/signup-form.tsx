@@ -53,17 +53,8 @@ export function SignupForm() {
       }
 
       if (result.data) {
-        // Send verification email after successful signup
-        try {
-          await authClient.sendVerificationEmail({ 
-            email,
-            callbackURL: "/verify-email"
-          });
-        } catch (emailError) {
-          console.error("Failed to send verification email:", emailError);
-        }
-        
-        router.push("/verify-email");
+        // Verification email is sent automatically by Better Auth
+        router.push("/dashboard");
       }
     } catch (error: any) {
       setError(error.message || "Signup failed. Please try again.");
