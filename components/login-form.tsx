@@ -28,13 +28,19 @@ export function LoginForm() {
       const result = await authClient.signIn.email({
         email: formData.get("email") as string,
         password: formData.get("password") as string,
+        callbackURL: "/dashboard",
       });
       
+      if (result.error) {
+        setError(result.error.message || "Login failed");
+        return;
+      }
+
       if (result.data) {
-        router.push("/");
+        router.push("/dashboard");
       }
     } catch (error: any) {
-      setError(error.message || "Login failed");
+      setError(error.message || "Login failed. Please check your credentials.");
     } finally {
       setIsLoading(false);
     }

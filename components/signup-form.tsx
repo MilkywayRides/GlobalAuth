@@ -23,17 +23,50 @@ export function SignupForm() {
     const formData = new FormData(e.currentTarget);
     
     try {
+      const email = formData.get("email") as string;
+      const password = formData.get("password") as string;
+      const name = formData.get("name") as string;
+
+      // Basic validation
+      if (!email || !password || !name) {
+        setError("All fields are required");
+        setIsLoading(false);
+        return;
+      }
+
+      if (password.length < 8) {
+        setError("Password must be at least 8 characters");
+        setIsLoading(false);
+        return;
+      }
+
       const result = await authClient.signUp.email({
-        email: formData.get("email") as string,
-        password: formData.get("password") as string,
-        name: formData.get("name") as string,
+        email,
+        password,
+        name,
+        callbackURL: "/dashboard",
       });
       
+      if (result.error) {
+        setError(result.error.message || "Signup failed");
+        return;
+      }
+
       if (result.data) {
-        router.push("/");
+        // Send verification email after successful signup
+        try {
+          await authClient.sendVerificationEmail({ 
+            email,
+            callbackURL: "/verify-email"
+          });
+        } catch (emailError) {
+          console.error("Failed to send verification email:", emailError);
+        }
+        
+        router.push("/verify-email");
       }
     } catch (error: any) {
-      setError(error.message || "Signup failed");
+      setError(error.message || "Signup failed. Please try again.");
     } finally {
       setIsLoading(false);
     }
@@ -83,7 +116,8 @@ export function SignupForm() {
               <Input 
                 id="password" 
                 name="password" 
-                type={showPassword ? "text" : "password"} 
+                type={showPassword ? "text" : "password"}
+                minLength={8}
                 required 
               />
               <button
@@ -94,6 +128,7 @@ export function SignupForm() {
                 {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
               </button>
             </div>
+            <p className="text-xs text-muted-foreground">Must be at least 8 characters</p>
           </div>
           
           <Button type="submit" className="w-full" disabled={isLoading}>
