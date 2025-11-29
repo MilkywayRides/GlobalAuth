@@ -73,13 +73,19 @@ export default function VerifyEmailPage() {
 
     setResending(true);
     try {
-      await authClient.sendVerificationEmail({ 
-        email: session.user.email,
-        callbackURL: "/verify-email"
+      const response = await fetch("/api/send-verification", {
+        method: "POST",
       });
-      toast.success("Verification email sent!");
+      
+      const data = await response.json();
+      
+      if (response.ok) {
+        toast.success("Verification email sent!");
+      } else {
+        toast.error(data.error || "Failed to send email");
+      }
     } catch (error: any) {
-      toast.error(error.message || "Failed to resend email");
+      toast.error("Failed to send email");
     } finally {
       setResending(false);
     }
