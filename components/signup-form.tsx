@@ -48,7 +48,16 @@ export function SignupForm() {
       });
       
       if (result.error) {
-        setError(result.error.message || "Signup failed");
+        const errorMsg = result.error.message || "Signup failed";
+        
+        // Check if email already exists
+        if (errorMsg.includes("existing email") || errorMsg.includes("already exists")) {
+          setError("Email already registered. Please sign in instead.");
+          setTimeout(() => router.push("/login"), 2000);
+          return;
+        }
+        
+        setError(errorMsg);
         return;
       }
 
