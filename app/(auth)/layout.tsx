@@ -14,9 +14,9 @@ export default function AuthLayout({
   const isLogin = pathname === "/login";
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-background p-4">
+    <div className="min-h-screen flex items-center justify-center bg-background p-4" suppressHydrationWarning>
       <div className="w-full max-w-md">
-        <div className="absolute top-4 right-4">
+        <div className="absolute top-4 right-4" suppressHydrationWarning>
           <ModeToggle />
         </div>
         
