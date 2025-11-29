@@ -52,10 +52,8 @@ export default function VerifyEmailPage() {
       
       toast.success("Email verified successfully!");
       
-      // Refresh session to get updated emailVerified status
-      await authClient.getSession();
-      
-      router.push("/dashboard");
+      // Force reload to get fresh session
+      window.location.href = "/dashboard";
     } catch (error: any) {
       toast.error(error.message || "Invalid verification code");
       setOtp("");
