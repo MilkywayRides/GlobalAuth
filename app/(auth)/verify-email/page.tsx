@@ -5,8 +5,11 @@ import { useRouter } from "next/navigation";
 import { authClient } from "@/lib/auth-client";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
+import {
+  InputOTP,
+  InputOTPGroup,
+  InputOTPSlot,
+} from "@/components/ui/input-otp";
 import { Mail, Loader2 } from "lucide-react";
 import { toast } from "sonner";
 
@@ -21,7 +24,7 @@ export default function VerifyEmailPage() {
   useEffect(() => {
     const checkVerification = async () => {
       if (!session?.user) {
-        router.push("/login");
+        setCheckingSession(false);
         return;
       }
       
@@ -38,6 +41,8 @@ export default function VerifyEmailPage() {
 
   const handleVerify = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (otp.length !== 6) return;
+    
     setLoading(true);
 
     try {
@@ -53,16 +58,23 @@ export default function VerifyEmailPage() {
       router.push("/dashboard");
     } catch (error: any) {
       toast.error(error.message || "Invalid verification code");
+      setOtp("");
     } finally {
       setLoading(false);
     }
   };
 
   const handleResend = async () => {
+    if (!session?.user?.email) {
+      toast.error("Please login first");
+      router.push("/login");
+      return;
+    }
+
     setResending(true);
     try {
       await authClient.sendVerificationEmail({ 
-        email: session?.user?.email || "",
+        email: session.user.email,
         callbackURL: "/verify-email"
       });
       toast.success("Verification email sent!");
@@ -81,6 +93,29 @@ export default function VerifyEmailPage() {
     );
   }
 
+  if (!session?.user) {
+    return (
+      <div className="flex min-h-screen items-center justify-center p-4">
+        <Card className="w-full max-w-md">
+          <CardHeader className="text-center">
+            <CardTitle>Login Required</CardTitle>
+            <CardDescription>
+              Please login to verify your email
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <Button 
+              onClick={() => router.push("/login")} 
+              className="w-full"
+            >
+              Go to Login
+            </Button>
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
+
   return (
     <div className="flex min-h-screen items-center justify-center p-4">
       <Card className="w-full max-w-md">
@@ -90,36 +125,49 @@ export default function VerifyEmailPage() {
           </div>
           <CardTitle>Verify Your Email</CardTitle>
           <CardDescription>
-            We sent a verification code to {session?.user?.email}
+            We sent a 6-digit code to<br />
+            <strong>{session.user.email}</strong>
           </CardDescription>
         </CardHeader>
         <CardContent>
-          <form onSubmit={handleVerify} className="space-y-4">
-            <div className="space-y-2">
-              <Label htmlFor="otp">Verification Code</Label>
-              <Input
-                id="otp"
-                placeholder="Enter 6-digit code"
-                value={otp}
-                onChange={(e) => setOtp(e.target.value.toUpperCase())}
+          <form onSubmit={handleVerify} className="space-y-6">
+            <div className="flex justify-center">
+              <InputOTP
                 maxLength={6}
-                className="text-center text-2xl tracking-widest"
-              />
+                value={otp}
+                onChange={(value) => setOtp(value.toUpperCase())}
+              >
+                <InputOTPGroup>
+                  <InputOTPSlot index={0} />
+                  <InputOTPSlot index={1} />
+                  <InputOTPSlot index={2} />
+                  <InputOTPSlot index={3} />
+                  <InputOTPSlot index={4} />
+                  <InputOTPSlot index={5} />
+                </InputOTPGroup>
+              </InputOTP>
             </div>
-            <Button type="submit" className="w-full" disabled={loading || otp.length !== 6}>
+            
+            <Button 
+              type="submit" 
+              className="w-full" 
+              disabled={loading || otp.length !== 6}
+            >
               {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
               Verify Email
             </Button>
-            <Button
-              type="button"
-              variant="ghost"
-              className="w-full"
-              onClick={handleResend}
-              disabled={resending}
-            >
-              {resending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-              Resend Code
-            </Button>
+            
+            <div className="text-center">
+              <Button
+                type="button"
+                variant="link"
+                onClick={handleResend}
+                disabled={resending}
+                className="text-sm"
+              >
+                {resending ? "Sending..." : "Didn't receive code? Resend"}
+              </Button>
+            </div>
           </form>
         </CardContent>
       </Card>
