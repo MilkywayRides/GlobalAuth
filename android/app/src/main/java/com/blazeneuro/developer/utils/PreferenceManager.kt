@@ -13,6 +13,7 @@ class PreferenceManager(context: Context) {
         private const val KEY_USER_NAME = "user_name"
         private const val KEY_USER_EMAIL = "user_email"
         private const val KEY_USER_ROLE = "user_role"
+        private const val KEY_EMAIL_VERIFIED = "email_verified"
         private const val KEY_TOKEN = "token"
     }
     
@@ -23,6 +24,7 @@ class PreferenceManager(context: Context) {
             putString(KEY_USER_NAME, user.name)
             putString(KEY_USER_EMAIL, user.email)
             putString(KEY_USER_ROLE, user.role)
+            putBoolean(KEY_EMAIL_VERIFIED, user.emailVerified)
             putString(KEY_TOKEN, token)
             apply()
         }
@@ -36,15 +38,24 @@ class PreferenceManager(context: Context) {
                 id = prefs.getString(KEY_USER_ID, "") ?: "",
                 name = prefs.getString(KEY_USER_NAME, "") ?: "",
                 email = prefs.getString(KEY_USER_EMAIL, "") ?: "",
-                role = prefs.getString(KEY_USER_ROLE, "") ?: ""
+                role = prefs.getString(KEY_USER_ROLE, "") ?: "",
+                emailVerified = prefs.getBoolean(KEY_EMAIL_VERIFIED, false)
             )
         } else null
     }
     
     fun getToken(): String? = prefs.getString(KEY_TOKEN, null)
     
-    fun logout() {
+    fun updateEmailVerified(verified: Boolean) {
+        prefs.edit().putBoolean(KEY_EMAIL_VERIFIED, verified).apply()
+    }
+    
+    fun clearUser() {
         prefs.edit().clear().apply()
+    }
+    
+    fun logout() {
+        clearUser()
     }
     
     fun isOnboardingCompleted(): Boolean {

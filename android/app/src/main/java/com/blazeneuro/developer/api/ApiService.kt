@@ -18,11 +18,22 @@ data class User(
     val id: String,
     val name: String,
     val email: String,
-    val role: String
+    val role: String,
+    val emailVerified: Boolean = false
+)
+
+data class SessionResponse(
+    val user: User? = null,
+    val session: Any? = null
 )
 
 data class QRResponse(
     val status: String,
+    val message: String? = null
+)
+
+data class VerificationResponse(
+    val success: Boolean,
     val message: String? = null
 )
 
@@ -47,4 +58,10 @@ interface ApiService {
     
     @GET("api/auth/qr/status/{sessionId}")
     suspend fun getQRStatus(@Path("sessionId") sessionId: String): Response<QRResponse>
+    
+    @POST("api/send-verification")
+    suspend fun resendVerification(): Response<VerificationResponse>
+    
+    @GET("api/auth/get-session")
+    suspend fun getSession(): Response<SessionResponse>
 }

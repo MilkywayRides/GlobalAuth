@@ -36,6 +36,11 @@ class SignupActivity : AppCompatActivity() {
                     return@setOnClickListener
                 }
                 
+                if (password.length < 8) {
+                    Toast.makeText(this@SignupActivity, "Password must be at least 8 characters", Toast.LENGTH_SHORT).show()
+                    return@setOnClickListener
+                }
+                
                 signup(name, email, password)
             }
             
@@ -61,8 +66,14 @@ class SignupActivity : AppCompatActivity() {
                     if (user != null && token != null) {
                         preferenceManager.saveUser(user, token)
                         
-                        Toast.makeText(this@SignupActivity, "Account created successfully!", Toast.LENGTH_SHORT).show()
-                        startActivity(Intent(this@SignupActivity, DashboardActivity::class.java))
+                        Toast.makeText(this@SignupActivity, "Account created! Please verify your email.", Toast.LENGTH_LONG).show()
+                        
+                        // Redirect to email verification if not verified
+                        if (!user.emailVerified) {
+                            startActivity(Intent(this@SignupActivity, EmailVerificationActivity::class.java))
+                        } else {
+                            startActivity(Intent(this@SignupActivity, DashboardActivity::class.java))
+                        }
                         finish()
                     }
                 } else {

@@ -19,7 +19,14 @@ class MainActivity : AppCompatActivity() {
         
         // Check if user is already logged in
         if (preferenceManager.isLoggedIn()) {
-            startActivity(Intent(this, DashboardActivity::class.java))
+            val user = preferenceManager.getUser()
+            
+            // Check email verification status
+            if (user?.emailVerified == false) {
+                startActivity(Intent(this, EmailVerificationActivity::class.java))
+            } else {
+                startActivity(Intent(this, DashboardActivity::class.java))
+            }
             finish()
             return
         }
