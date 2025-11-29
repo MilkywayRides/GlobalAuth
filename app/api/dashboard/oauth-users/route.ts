@@ -15,7 +15,7 @@ export async function GET(req: Request) {
     }
 
     try {
-        // Get OAuth tokens with user and application data
+        // Get OAuth tokens only for apps owned by the current user
         const oauthUsers = await db
             .select({
                 userId: oauthTokens.userId,
@@ -25,11 +25,12 @@ export async function GET(req: Request) {
                 appName: applications.name,
                 clientId: applications.clientId,
                 lastLogin: oauthTokens.createdAt,
-                accessLevel: oauthTokens.scope, // We'll determine this from client ID
+                accessLevel: oauthTokens.scope,
             })
             .from(oauthTokens)
             .innerJoin(applications, eq(oauthTokens.clientId, applications.clientId))
             .innerJoin(user, eq(oauthTokens.userId, user.id))
+            .where(eq(applications.userId, session.user.id))
             .orderBy(desc(oauthTokens.createdAt));
 
         // Transform data and determine access level
