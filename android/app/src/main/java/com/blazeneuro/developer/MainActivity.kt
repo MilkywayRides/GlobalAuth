@@ -3,6 +3,7 @@ package com.blazeneuro.developer
 import android.content.Intent
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
+import com.blazeneuro.developer.api.ApiClient
 import com.blazeneuro.developer.databinding.ActivityMainBinding
 import com.blazeneuro.developer.utils.PreferenceManager
 
@@ -14,6 +15,9 @@ class MainActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
+        
+        // Initialize ApiClient with context
+        ApiClient.init(applicationContext)
         
         preferenceManager = PreferenceManager(this)
         
