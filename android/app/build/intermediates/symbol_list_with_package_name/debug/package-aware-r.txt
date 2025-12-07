@@ -1346,8 +1346,6 @@ color abc_tint_edittext
 color abc_tint_seek_thumb
 color abc_tint_spinner
 color abc_tint_switch_track
-color accent
-color accent_foreground
 color accent_material_dark
 color accent_material_light
 color androidx_core_ripple_material_light
@@ -1369,8 +1367,6 @@ color button_material_dark
 color button_material_light
 color call_notification_answer_color
 color call_notification_decline_color
-color card
-color card_foreground
 color cardview_dark_background
 color cardview_light_background
 color cardview_shadow_end_color
@@ -2094,7 +2090,6 @@ color primary_text_default_material_dark
 color primary_text_default_material_light
 color primary_text_disabled_material_dark
 color primary_text_disabled_material_light
-color ring
 color ripple_material_dark
 color ripple_material_light
 color secondary
@@ -3022,6 +3017,7 @@ drawable ic_mtrl_chip_checked_black
 drawable ic_mtrl_chip_checked_circle
 drawable ic_mtrl_chip_close_circle
 drawable ic_search_black_24
+drawable input_background
 drawable m3_avd_hide_password
 drawable m3_avd_show_password
 drawable m3_bottom_sheet_drag_handle
@@ -3199,6 +3195,7 @@ id bounceStart
 id btnLogin
 id btnLogout
 id btnNext
+id btnOAuth
 id btnSignup
 id buttonPanel
 id cache_measures

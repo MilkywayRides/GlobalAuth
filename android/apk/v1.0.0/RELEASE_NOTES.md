@@ -34,3 +34,10 @@ adb install blazeneuro-mobile-v1.0.0-production.apk
 ## Files
 - `blazeneuro-mobile-v1.0.0.apk` - Development version (localhost)
 - `blazeneuro-mobile-v1.0.0-production.apk` - Production version (developer.blazeneuro.com)
+
+## UI Variants
+- `blazeneuro-mobile-v1.0.0-blackwhite.apk` - **Pure black/white theme, no headers**
+  - Light mode: Pure white background, black text
+  - Dark mode: Pure black background, white text
+  - No navigation headers on auth pages
+  - Clean, minimal design

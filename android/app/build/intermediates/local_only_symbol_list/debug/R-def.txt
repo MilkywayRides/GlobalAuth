@@ -1,12 +1,8 @@
 R_DEF: Internal format may change without notice
 local
-color accent
-color accent_foreground
 color background
 color black
 color border
-color card
-color card_foreground
 color destructive
 color destructive_foreground
 color foreground
@@ -17,16 +13,17 @@ color muted
 color muted_foreground
 color primary
 color primary_foreground
-color ring
 color secondary
 color secondary_foreground
 color white
 drawable button_primary
 drawable button_secondary
+drawable input_background
 drawable splash_background
 id btnLogin
 id btnLogout
 id btnNext
+id btnOAuth
 id btnSignup
 id tvTitle
 id tvUserEmail

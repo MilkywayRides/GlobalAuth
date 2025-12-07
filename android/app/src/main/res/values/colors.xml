@@ -1,9 +1,22 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+    <!-- Light theme - pure white/black -->
+    <color name="primary">#000000</color>
+    <color name="primary_foreground">#FFFFFF</color>
+    <color name="secondary">#F5F5F5</color>
+    <color name="secondary_foreground">#000000</color>
+    <color name="background">#FFFFFF</color>
+    <color name="foreground">#000000</color>
+    <color name="muted">#F5F5F5</color>
+    <color name="muted_foreground">#666666</color>
+    <color name="border">#E5E5E5</color>
+    <color name="input">#FFFFFF</color>
+    <color name="destructive">#FF0000</color>
+    <color name="destructive_foreground">#FFFFFF</color>
+    
+    <!-- Legacy colors -->
     <color name="black">#000000</color>
     <color name="white">#FFFFFF</color>
     <color name="gray_light">#F5F5F5</color>
     <color name="gray_dark">#1A1A1A</color>
-    <color name="destructive">#FF0000</color>
-    <color name="destructive_foreground">#FFFFFF</color>
 </resources>

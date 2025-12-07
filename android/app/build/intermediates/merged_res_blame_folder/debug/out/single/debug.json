@@ -40,6 +40,10 @@
         "source": "com.blazeneuro.auth.app-main-36:/layout/activity_web_auth.xml"
     },
     {
+        "merged": "com.blazeneuro.auth.app-merged_res-34:/drawable_input_background.xml.flat",
+        "source": "com.blazeneuro.auth.app-main-36:/drawable/input_background.xml"
+    },
+    {
         "merged": "com.blazeneuro.auth.app-merged_res-34:/drawable_splash_background.xml.flat",
         "source": "com.blazeneuro.auth.app-main-36:/drawable/splash_background.xml"
     },

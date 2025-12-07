@@ -23,12 +23,16 @@ public final class ActivityAuthBinding implements ViewBinding {
   public final Button btnLogin;
 
   @NonNull
+  public final Button btnOAuth;
+
+  @NonNull
   public final Button btnSignup;
 
   private ActivityAuthBinding(@NonNull LinearLayout rootView, @NonNull Button btnLogin,
-      @NonNull Button btnSignup) {
+      @NonNull Button btnOAuth, @NonNull Button btnSignup) {
     this.rootView = rootView;
     this.btnLogin = btnLogin;
+    this.btnOAuth = btnOAuth;
     this.btnSignup = btnSignup;
   }
 
@@ -65,13 +69,19 @@ public final class ActivityAuthBinding implements ViewBinding {
         break missingId;
       }
 
+      id = R.id.btnOAuth;
+      Button btnOAuth = ViewBindings.findChildViewById(rootView, id);
+      if (btnOAuth == null) {
+        break missingId;
+      }
+
       id = R.id.btnSignup;
       Button btnSignup = ViewBindings.findChildViewById(rootView, id);
       if (btnSignup == null) {
         break missingId;
       }
 
-      return new ActivityAuthBinding((LinearLayout) rootView, btnLogin, btnSignup);
+      return new ActivityAuthBinding((LinearLayout) rootView, btnLogin, btnOAuth, btnSignup);
     }
     String missingId = rootView.getResources().getResourceName(id);
     throw new NullPointerException("Missing required view with ID: ".concat(missingId));
