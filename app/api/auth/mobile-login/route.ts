@@ -1,19 +1,44 @@
 import { NextResponse } from "next/server";
 import { db } from "@/lib/db";
-import { user, session } from "@/lib/db/schema";
-import { eq } from "drizzle-orm";
+import { user, session, account } from "@/lib/db/schema";
+import { eq, and } from "drizzle-orm";
 import crypto from "crypto";
+import bcrypt from "bcryptjs";
 
-// Simple password hash verification (Better Auth uses bcrypt internally)
-async function verifyPassword(password: string, hashedPassword: string): Promise<boolean> {
-  // This is a simplified version - Better Auth handles this internally
-  // For now, we'll just check if password exists
-  return hashedPassword !== null;
+// Simple in-memory rate limiting (use Redis in production)
+const loginAttempts = new Map<string, { count: number; resetAt: number }>();
+
+function checkRateLimit(identifier: string): boolean {
+  const now = Date.now();
+  const attempt = loginAttempts.get(identifier);
+  
+  if (!attempt || now > attempt.resetAt) {
+    loginAttempts.set(identifier, { count: 1, resetAt: now + 15 * 60 * 1000 }); // 15 min window
+    return true;
+  }
+  
+  if (attempt.count >= 5) {
+    return false;
+  }
+  
+  attempt.count++;
+  return true;
 }
 
 export async function POST(req: Request) {
   try {
     const { email, password } = await req.json();
+    
+    // Rate limiting
+    const clientIp = req.headers.get('x-forwarded-for') || req.headers.get('x-real-ip') || 'unknown';
+    const rateLimitKey = `${email}:${clientIp}`;
+    
+    if (!checkRateLimit(rateLimitKey)) {
+      return NextResponse.json(
+        { success: false, message: "Too many login attempts. Please try again later." },
+        { status: 429 }
+      );
+    }
 
     if (!email || !password) {
       return NextResponse.json(
@@ -30,6 +55,43 @@ export async function POST(req: Request) {
       .limit(1);
 
     if (!foundUser) {
+      return NextResponse.json(
+        { success: false, message: "Invalid credentials" },
+        { status: 401 }
+      );
+    }
+
+    // Check if user is banned
+    if (foundUser.banned) {
+      return NextResponse.json(
+        { success: false, message: "Account is banned" },
+        { status: 403 }
+      );
+    }
+
+    // Find account with password (credential provider)
+    const [userAccount] = await db
+      .select()
+      .from(account)
+      .where(
+        and(
+          eq(account.userId, foundUser.id),
+          eq(account.providerId, "credential")
+        )
+      )
+      .limit(1);
+
+    if (!userAccount || !userAccount.password) {
+      return NextResponse.json(
+        { success: false, message: "Invalid credentials" },
+        { status: 401 }
+      );
+    }
+
+    // Verify password
+    const isValidPassword = await bcrypt.compare(password, userAccount.password);
+    
+    if (!isValidPassword) {
       return NextResponse.json(
         { success: false, message: "Invalid credentials" },
         { status: 401 }

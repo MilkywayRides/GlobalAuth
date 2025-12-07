@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { authClient } from "@/lib/auth-client";
 import { SignupForm } from "@/components/signup-form";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -12,6 +12,8 @@ import { AlertTriangle } from "lucide-react";
 export default function SignupPage() {
   const { data: session, isPending } = authClient.useSession();
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const callbackUrl = searchParams.get('callbackUrl');
   const [isShutdown, setIsShutdown] = useState(false);
   const [checkingShutdown, setCheckingShutdown] = useState(true);
 
@@ -21,14 +23,19 @@ export default function SignupPage() {
 
   useEffect(() => {
     if (!isPending && session) {
-      // Redirect to verify-email if not verified, otherwise dashboard
-      if (session.user.emailVerified) {
-        router.push("/dashboard");
+      // If there's a callback URL, redirect there after signup
+      if (callbackUrl) {
+        router.push(callbackUrl);
       } else {
-        router.push("/verify-email");
+        // Redirect to verify-email if not verified, otherwise dashboard
+        if (session.user.emailVerified) {
+          router.push("/dashboard");
+        } else {
+          router.push("/verify-email");
+        }
       }
     }
-  }, [session, isPending, router]);
+  }, [session, isPending, router, callbackUrl]);
 
   const checkShutdownStatus = async () => {
     try {
@@ -87,10 +94,12 @@ export default function SignupPage() {
       <Card className="w-full max-w-md">
         <CardHeader>
           <CardTitle>Create Account</CardTitle>
-          <CardDescription>Sign up to get started</CardDescription>
+          <CardDescription>
+            {callbackUrl ? 'Sign up to continue with mobile app' : 'Sign up to get started'}
+          </CardDescription>
         </CardHeader>
         <CardContent>
-          <SignupForm />
+          <SignupForm callbackUrl={callbackUrl} />
         </CardContent>
       </Card>
     </div>

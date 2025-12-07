@@ -7,15 +7,12 @@ const nextConfig: NextConfig = {
   
   // Development optimizations
   ...(process.env.NODE_ENV === 'development' && {
-    // Faster builds in development
-    swcMinify: false,
     // Better error overlay
     reactStrictMode: true,
   }),
 
   // Production-only optimizations
   ...(process.env.NODE_ENV === 'production' && {
-    swcMinify: true,
     // Remove console logs in production
     compiler: {
       removeConsole: {

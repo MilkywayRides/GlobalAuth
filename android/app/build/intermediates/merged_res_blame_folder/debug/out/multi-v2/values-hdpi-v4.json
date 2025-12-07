@@ -1,7 +1,7 @@
 {
     "logs": [
         {
-            "outputFile": "com.blazeneuro.developer.app-mergeDebugResources-56:/values-hdpi-v4/values-hdpi-v4.xml",
+            "outputFile": "com.blazeneuro.auth.app-mergeDebugResources-32:/values-hdpi-v4/values-hdpi-v4.xml",
             "map": [
                 {
                     "source": "/home/ankit/.gradle/caches/transforms-3/3fdcd8fc8fdde99adb1eb4c1f0cd10bd/transformed/appcompat-1.6.1/res/values-hdpi-v4/values-hdpi-v4.xml",

@@ -41,7 +41,7 @@ class WebAuthActivity : AppCompatActivity() {
         }
         
         // Build OAuth URL with your credentials
-        val baseUrl = "http://10.0.2.2:3000"
+        val baseUrl = "https://developer.blazeneuro.com"
         val oauthUrl = buildString {
             append("$baseUrl/oauth/authorize?")
             append("response_type=code&")

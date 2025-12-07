@@ -1,7 +1,7 @@
 {
     "logs": [
         {
-            "outputFile": "com.blazeneuro.developer.app-mergeDebugResources-56:/values-w320dp-land-v13/values-w320dp-land-v13.xml",
+            "outputFile": "com.blazeneuro.auth.app-mergeDebugResources-32:/values-w320dp-land-v13/values-w320dp-land-v13.xml",
             "map": [
                 {
                     "source": "/home/ankit/.gradle/caches/transforms-3/6bf27c0a08c7a51da7bc9eb8b01ba35e/transformed/material-1.11.0/res/values-w320dp-land-v13/values-w320dp-land-v13.xml",

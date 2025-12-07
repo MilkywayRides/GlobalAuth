@@ -9,7 +9,7 @@ import retrofit2.converter.gson.GsonConverterFactory
 import retrofit2.http.*
 
 object ApiClient {
-    private const val BASE_URL = "http://10.0.2.2:3000/api/"
+    private const val BASE_URL = "https://developer.blazeneuro.com/api/"
     
     fun create(context: Context): ApiService {
         val client = OkHttpClient.Builder()

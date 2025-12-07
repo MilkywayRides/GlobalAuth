@@ -10,7 +10,11 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Eye, EyeOff } from "lucide-react";
 
-export function SignupForm() {
+interface SignupFormProps {
+  callbackUrl?: string | null;
+}
+
+export function SignupForm({ callbackUrl }: SignupFormProps) {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState("");
   const [showPassword, setShowPassword] = useState(false);
@@ -26,8 +30,6 @@ export function SignupForm() {
       const email = formData.get("email") as string;
       const password = formData.get("password") as string;
       const name = formData.get("name") as string;
-
-      // Basic validation
       if (!email || !password || !name) {
         setError("All fields are required");
         setIsLoading(false);
@@ -63,7 +65,12 @@ export function SignupForm() {
 
       if (result.data) {
         // Verification email is sent automatically by Better Auth
-        router.push("/verify-email");
+        if (callbackUrl) {
+          // For OAuth flow, redirect back to the callback URL after signup
+          router.push(callbackUrl);
+        } else {
+          router.push("/verify-email");
+        }
       }
     } catch (error: any) {
       setError(error.message || "Signup failed. Please try again.");
@@ -168,7 +175,10 @@ export function SignupForm() {
 
         <div className="text-center text-sm">
           Already have an account?{" "}
-          <Link href="/login" className="underline">
+          <Link 
+            href={`/login${callbackUrl ? `?callbackUrl=${encodeURIComponent(callbackUrl)}` : ''}`} 
+            className="underline"
+          >
             Sign in
           </Link>
         </div>

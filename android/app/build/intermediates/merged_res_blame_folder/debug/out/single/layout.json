@@ -1,38 +1,22 @@
 [
     {
-        "merged": "/home/ankit/.gradle/daemon/8.2/com.blazeneuro.developer.app-mergeDebugResources-57:/layout/activity_onboarding.xml",
-        "source": "/home/ankit/.gradle/daemon/8.2/com.blazeneuro.developer.app-main-60:/layout/activity_onboarding.xml"
+        "merged": "com.blazeneuro.auth.app-mergeDebugResources-33:/layout/item_onboarding.xml",
+        "source": "com.blazeneuro.auth.app-main-36:/layout/item_onboarding.xml"
     },
     {
-        "merged": "/home/ankit/.gradle/daemon/8.2/com.blazeneuro.developer.app-mergeDebugResources-57:/layout/activity_main.xml",
-        "source": "/home/ankit/.gradle/daemon/8.2/com.blazeneuro.developer.app-main-60:/layout/activity_main.xml"
+        "merged": "com.blazeneuro.auth.app-mergeDebugResources-33:/layout/activity_home.xml",
+        "source": "com.blazeneuro.auth.app-main-36:/layout/activity_home.xml"
     },
     {
-        "merged": "/home/ankit/.gradle/daemon/8.2/com.blazeneuro.developer.app-mergeDebugResources-57:/layout/activity_login.xml",
-        "source": "/home/ankit/.gradle/daemon/8.2/com.blazeneuro.developer.app-main-60:/layout/activity_login.xml"
+        "merged": "com.blazeneuro.auth.app-mergeDebugResources-33:/layout/activity_onboarding.xml",
+        "source": "com.blazeneuro.auth.app-main-36:/layout/activity_onboarding.xml"
     },
     {
-        "merged": "/home/ankit/.gradle/daemon/8.2/com.blazeneuro.developer.app-mergeDebugResources-57:/layout/activity_qrscan.xml",
-        "source": "/home/ankit/.gradle/daemon/8.2/com.blazeneuro.developer.app-main-60:/layout/activity_qrscan.xml"
+        "merged": "com.blazeneuro.auth.app-mergeDebugResources-33:/layout/activity_web_auth.xml",
+        "source": "com.blazeneuro.auth.app-main-36:/layout/activity_web_auth.xml"
     },
     {
-        "merged": "/home/ankit/.gradle/daemon/8.2/com.blazeneuro.developer.app-mergeDebugResources-57:/layout/activity_dashboard.xml",
-        "source": "/home/ankit/.gradle/daemon/8.2/com.blazeneuro.developer.app-main-60:/layout/activity_dashboard.xml"
-    },
-    {
-        "merged": "/home/ankit/.gradle/daemon/8.2/com.blazeneuro.developer.app-mergeDebugResources-57:/layout/activity_email_verification.xml",
-        "source": "/home/ankit/.gradle/daemon/8.2/com.blazeneuro.developer.app-main-60:/layout/activity_email_verification.xml"
-    },
-    {
-        "merged": "/home/ankit/.gradle/daemon/8.2/com.blazeneuro.developer.app-mergeDebugResources-57:/layout/item_onboarding.xml",
-        "source": "/home/ankit/.gradle/daemon/8.2/com.blazeneuro.developer.app-main-60:/layout/item_onboarding.xml"
-    },
-    {
-        "merged": "com.blazeneuro.developer.app-mergeDebugResources-57:/layout/activity_email_verification.xml",
-        "source": "com.blazeneuro.developer.app-main-60:/layout/activity_email_verification.xml"
-    },
-    {
-        "merged": "/home/ankit/.gradle/daemon/8.2/com.blazeneuro.developer.app-mergeDebugResources-57:/layout/activity_signup.xml",
-        "source": "/home/ankit/.gradle/daemon/8.2/com.blazeneuro.developer.app-main-60:/layout/activity_signup.xml"
+        "merged": "com.blazeneuro.auth.app-mergeDebugResources-33:/layout/activity_auth.xml",
+        "source": "com.blazeneuro.auth.app-main-36:/layout/activity_auth.xml"
     }
 ]
