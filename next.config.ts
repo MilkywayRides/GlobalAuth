@@ -71,6 +71,16 @@ const nextConfig: NextConfig = {
   
   // Bundle optimization
   webpack: (config, { dev, isServer }) => {
+    // Fix 'self is not defined' error
+    if (!isServer) {
+      config.resolve.fallback = {
+        ...config.resolve.fallback,
+        fs: false,
+        net: false,
+        tls: false,
+      };
+    }
+
     // Production bundle splitting
     if (!dev && !isServer) {
       config.optimization.splitChunks.cacheGroups = {
