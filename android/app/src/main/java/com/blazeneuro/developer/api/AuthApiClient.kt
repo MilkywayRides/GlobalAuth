@@ -58,6 +58,8 @@ class AuthApiClient(private val context: Context) {
                 
                 storage.saveToken(authResponse.token)
                 Result.success(authResponse)
+            } else if (connection.responseCode == 403) {
+                Result.failure(Exception("Email not verified"))
             } else {
                 Result.failure(Exception("Login failed"))
             }

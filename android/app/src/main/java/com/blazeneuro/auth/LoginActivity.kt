@@ -88,7 +88,15 @@ class LoginActivity : AppCompatActivity() {
                 startActivity(Intent(this@LoginActivity, HomeActivity::class.java))
                 finish()
             }.onFailure { error ->
-                Toast.makeText(this@LoginActivity, "Login failed: ${error.message}", Toast.LENGTH_SHORT).show()
+                val errorMsg = error.message ?: ""
+                if (errorMsg.contains("Email not verified") || errorMsg.contains("403")) {
+                    Toast.makeText(this@LoginActivity, "Please verify your email first", Toast.LENGTH_SHORT).show()
+                    val intent = Intent(this@LoginActivity, VerifyEmailActivity::class.java)
+                    intent.putExtra("email", email)
+                    startActivity(intent)
+                } else {
+                    Toast.makeText(this@LoginActivity, "Login failed: ${error.message}", Toast.LENGTH_SHORT).show()
+                }
             }
         }
     }

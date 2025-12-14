@@ -24,6 +24,7 @@ export async function POST(req: NextRequest) {
     const expiresAt = new Date(Date.now() + 10 * 60 * 1000);
 
     await db.insert(verification).values({
+      id: crypto.randomUUID(),
       identifier: email,
       value: code,
       expiresAt,

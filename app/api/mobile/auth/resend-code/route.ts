@@ -22,6 +22,7 @@ export async function POST(req: NextRequest) {
     await db.delete(verification).where(eq(verification.identifier, email));
 
     await db.insert(verification).values({
+      id: crypto.randomUUID(),
       identifier: email,
       value: code,
       expiresAt,

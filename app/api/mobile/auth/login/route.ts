@@ -19,6 +19,14 @@ export async function POST(req: NextRequest) {
 
     const userData = await db.select().from(user).where(eq(user.email, email)).limit(1);
 
+    if (!userData[0].emailVerified) {
+      return NextResponse.json({ 
+        error: "Email not verified",
+        emailVerified: false,
+        email: email
+      }, { status: 403 });
+    }
+
     return NextResponse.json({
       token: session.token,
       user: {
