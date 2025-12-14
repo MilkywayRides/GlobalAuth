@@ -32,6 +32,14 @@ class AuthActivity : AppCompatActivity() {
                 showNetworkError()
             }
         }
+        
+        binding.btnOAuth.setOnClickListener {
+            if (isNetworkAvailable()) {
+                startOAuthFlow("login")
+            } else {
+                showNetworkError()
+            }
+        }
     }
     
     private fun isNetworkAvailable(): Boolean {

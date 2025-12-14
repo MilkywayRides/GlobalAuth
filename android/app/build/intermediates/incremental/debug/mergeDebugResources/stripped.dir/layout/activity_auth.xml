@@ -64,6 +64,7 @@
         android:textColor="@color/secondary_foreground"
         android:textSize="14sp"
         android:elevation="0dp"
-        android:stateListAnimator="@null" />
+        android:stateListAnimator="@null"
+        android:onClick="startOAuthFlow" />
 
 </LinearLayout>
