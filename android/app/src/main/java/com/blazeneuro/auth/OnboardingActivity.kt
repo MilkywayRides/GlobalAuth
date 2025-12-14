@@ -4,7 +4,7 @@ import android.content.Intent
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
 import androidx.viewpager2.widget.ViewPager2
-import com.blazeneuro.auth.databinding.ActivityOnboardingBinding
+import com.blazeneuro.developer.databinding.ActivityOnboardingBinding
 
 class OnboardingActivity : AppCompatActivity() {
     private lateinit var binding: ActivityOnboardingBinding

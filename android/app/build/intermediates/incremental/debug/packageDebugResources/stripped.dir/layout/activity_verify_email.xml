@@ -1,0 +1,69 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:padding="24dp"
+    android:gravity="center"
+    android:background="@color/background">
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Verify Your Email"
+        android:textSize="28sp"
+        android:textStyle="bold"
+        android:textColor="@color/foreground"
+        android:layout_marginBottom="8dp" />
+
+    <TextView
+        android:id="@+id/emailText"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="We sent a code to your email"
+        android:textSize="14sp"
+        android:textColor="@color/muted_foreground"
+        android:layout_marginBottom="32dp"
+        android:gravity="center" />
+
+    <EditText
+        android:id="@+id/codeInput"
+        android:layout_width="match_parent"
+        android:layout_height="56dp"
+        android:background="@drawable/input_background"
+        android:hint="Enter 6-digit code"
+        android:inputType="number"
+        android:maxLength="6"
+        android:paddingHorizontal="16dp"
+        android:textColor="@color/foreground"
+        android:textColorHint="@color/muted_foreground"
+        android:textSize="18sp"
+        android:gravity="center"
+        android:letterSpacing="0.3"
+        android:layout_marginBottom="24dp" />
+
+    <Button
+        android:id="@+id/verifyButton"
+        android:layout_width="match_parent"
+        android:layout_height="48dp"
+        android:background="@drawable/button_primary"
+        android:text="Verify Email"
+        android:textColor="@color/primary_foreground"
+        android:textSize="14sp"
+        android:textStyle="bold"
+        android:elevation="0dp"
+        android:stateListAnimator="@null"
+        android:layout_marginBottom="16dp" />
+
+    <TextView
+        android:id="@+id/resendButton"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Resend Code"
+        android:textSize="14sp"
+        android:textColor="@color/primary"
+        android:clickable="true"
+        android:focusable="true"
+        android:padding="8dp" />
+
+</LinearLayout>

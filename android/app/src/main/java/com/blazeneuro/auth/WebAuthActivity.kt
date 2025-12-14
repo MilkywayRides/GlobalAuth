@@ -5,7 +5,7 @@ import android.os.Bundle
 import android.webkit.*
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.lifecycleScope
-import com.blazeneuro.auth.databinding.ActivityWebAuthBinding
+import com.blazeneuro.developer.databinding.ActivityWebAuthBinding
 import kotlinx.coroutines.launch
 
 class WebAuthActivity : AppCompatActivity() {

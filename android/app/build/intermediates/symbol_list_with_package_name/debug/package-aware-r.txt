@@ -1,4 +1,4 @@
-com.blazeneuro.auth
+com.blazeneuro.developer
 anim abc_fade_in
 anim abc_fade_out
 anim abc_grow_fade_in_from_bottom
@@ -1363,6 +1363,10 @@ color bright_foreground_inverse_material_dark
 color bright_foreground_inverse_material_light
 color bright_foreground_material_dark
 color bright_foreground_material_light
+color browser_actions_bg_grey
+color browser_actions_divider_color
+color browser_actions_text_color
+color browser_actions_title_color
 color button_material_dark
 color button_material_light
 color call_notification_answer_color
@@ -2189,6 +2193,8 @@ dimen abc_text_size_subtitle_material_toolbar
 dimen abc_text_size_title_material
 dimen abc_text_size_title_material_toolbar
 dimen appcompat_dialog_background_inset
+dimen browser_actions_context_menu_max_width
+dimen browser_actions_context_menu_min_padding
 dimen cardview_compat_inset_shadow
 dimen cardview_default_elevation
 dimen cardview_default_radius
@@ -3192,6 +3198,11 @@ id bounce
 id bounceBoth
 id bounceEnd
 id bounceStart
+id browser_actions_header_text
+id browser_actions_menu_item_icon
+id browser_actions_menu_item_text
+id browser_actions_menu_items
+id browser_actions_menu_view
 id btnLogin
 id btnLogout
 id btnNext
@@ -3219,6 +3230,7 @@ id clip_horizontal
 id clip_vertical
 id clockwise
 id closest
+id codeInput
 id collapseActionView
 id compress
 id confirm_button
@@ -3236,6 +3248,7 @@ id currentState
 id custom
 id customPanel
 id cut
+id dataBinding
 id date_picker_actions
 id decelerate
 id decelerateAndComplete
@@ -3273,6 +3286,8 @@ id edge
 id edit_query
 id edit_text_id
 id elastic
+id emailInput
+id emailText
 id embed
 id end
 id endToStart
@@ -3300,7 +3315,9 @@ id frost
 id fullscreen_header
 id ghost_view
 id ghost_view_holder
+id githubButton
 id gone
+id googleButton
 id graph
 id graph_wrap
 id group_divider
@@ -3339,6 +3356,8 @@ id line3
 id linear
 id listMode
 id list_item
+id loginButton
+id loginLink
 id m3_side_sheet
 id marquee
 id masked
@@ -3399,6 +3418,7 @@ id mtrl_picker_text_input_range_start
 id mtrl_picker_title_text
 id mtrl_view_tag_bottom_padding
 id multiply
+id nameInput
 id navigation_bar_item_active_indicator_view
 id navigation_bar_item_icon_container
 id navigation_bar_item_icon_view
@@ -3419,6 +3439,8 @@ id notification_main_column
 id notification_main_column_container
 id off
 id on
+id onAttachStateChangeListener
+id onDateChanged
 id onInterceptTouchReturnSwipe
 id open_search_bar_text_view
 id open_search_view_background
@@ -3443,6 +3465,7 @@ id parent
 id parentPanel
 id parentRelative
 id parent_matrix
+id passwordInput
 id password_toggle
 id path
 id pathRelative
@@ -3458,6 +3481,7 @@ id radio
 id ratio
 id rectangles
 id report_drawn
+id resendButton
 id reverseSawtooth
 id right
 id rightToLeft
@@ -3494,6 +3518,8 @@ id shortcut
 id showCustom
 id showHome
 id showTitle
+id signupButton
+id signupLink
 id sin
 id skipCollapsed
 id skipped
@@ -3547,6 +3573,7 @@ id textSpacerNoButtons
 id textSpacerNoTitle
 id textStart
 id textTop
+id textWatcher
 id text_input_end_icon
 id text_input_error_icon
 id text_input_start_icon
@@ -3580,6 +3607,7 @@ id uniform
 id unlabeled
 id up
 id useLogo
+id verifyButton
 id vertical_only
 id viewPager
 id view_offset_helper
@@ -3716,8 +3744,13 @@ layout abc_select_dialog_material
 layout abc_tooltip
 layout activity_auth
 layout activity_home
+layout activity_login
 layout activity_onboarding
+layout activity_signup
+layout activity_verify_email
 layout activity_web_auth
+layout browser_actions_context_menu_page
+layout browser_actions_context_menu_row
 layout custom_dialog
 layout design_bottom_navigation_item
 layout design_bottom_sheet_dialog
@@ -3848,11 +3881,15 @@ string character_counter_content_description
 string character_counter_overflowed_content_description
 string character_counter_pattern
 string clear_text_end_icon_content_description
+string copy_toast_msg
 string error_a11y_label
 string error_icon_content_description
 string exposed_dropdown_menu_content_description
 string fab_transformation_scrim_behavior
 string fab_transformation_sheet_behavior
+string fallback_menu_item_copy_link
+string fallback_menu_item_open_in_browser
+string fallback_menu_item_share_link
 string hide_bottom_view_on_scroll_behavior
 string icon_content_description
 string item_view_role_description
@@ -5241,4 +5278,5 @@ styleable ViewTransition android_id SharedValue SharedValueId clearsTag duration
 styleable include constraintSet
 xml backup_rules
 xml data_extraction_rules
+xml image_share_filepaths
 xml network_security_config

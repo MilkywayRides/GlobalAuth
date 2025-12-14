@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    package="com.blazeneuro.auth"
+    package="com.blazeneuro.developer"
     android:versionCode="1"
     android:versionName="1.0" >
 
@@ -12,10 +12,10 @@
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
 
     <permission
-        android:name="com.blazeneuro.auth.DYNAMIC_RECEIVER_NOT_EXPORTED_PERMISSION"
+        android:name="com.blazeneuro.developer.DYNAMIC_RECEIVER_NOT_EXPORTED_PERMISSION"
         android:protectionLevel="signature" />
 
-    <uses-permission android:name="com.blazeneuro.auth.DYNAMIC_RECEIVER_NOT_EXPORTED_PERMISSION" />
+    <uses-permission android:name="com.blazeneuro.developer.DYNAMIC_RECEIVER_NOT_EXPORTED_PERMISSION" />
 
     <application
         android:allowBackup="true"
@@ -43,6 +43,39 @@
             android:name="com.blazeneuro.auth.AuthActivity"
             android:exported="false" />
         <activity
+            android:name="com.blazeneuro.auth.LoginActivity"
+            android:exported="true"
+            android:launchMode="singleTop" >
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW" />
+
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+
+                <data
+                    android:host="auth"
+                    android:scheme="blazeneuro" />
+            </intent-filter>
+        </activity>
+        <activity
+            android:name="com.blazeneuro.auth.SignupActivity"
+            android:exported="true"
+            android:launchMode="singleTop" >
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW" />
+
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+
+                <data
+                    android:host="auth"
+                    android:scheme="blazeneuro" />
+            </intent-filter>
+        </activity>
+        <activity
+            android:name="com.blazeneuro.auth.VerifyEmailActivity"
+            android:exported="false" />
+        <activity
             android:name="com.blazeneuro.auth.WebAuthActivity"
             android:exported="true" >
             <intent-filter>
@@ -62,7 +95,7 @@
 
         <provider
             android:name="androidx.startup.InitializationProvider"
-            android:authorities="com.blazeneuro.auth.androidx-startup"
+            android:authorities="com.blazeneuro.developer.androidx-startup"
             android:exported="false" >
             <meta-data
                 android:name="androidx.emoji2.text.EmojiCompatInitializer"

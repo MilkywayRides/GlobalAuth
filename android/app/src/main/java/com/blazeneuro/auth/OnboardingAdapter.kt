@@ -1,4 +1,5 @@
 package com.blazeneuro.auth
+import com.blazeneuro.developer.R
 
 import android.view.LayoutInflater
 import android.view.View

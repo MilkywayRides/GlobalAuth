@@ -3,7 +3,7 @@ package com.blazeneuro.auth
 import android.content.Intent
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
-import com.blazeneuro.auth.databinding.ActivityHomeBinding
+import com.blazeneuro.developer.databinding.ActivityHomeBinding
 
 class HomeActivity : AppCompatActivity() {
     private lateinit var binding: ActivityHomeBinding

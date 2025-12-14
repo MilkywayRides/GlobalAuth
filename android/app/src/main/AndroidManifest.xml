@@ -12,7 +12,7 @@
         android:networkSecurityConfig="@xml/network_security_config">
 
         <activity
-            android:name=".SplashActivity"
+            android:name="com.blazeneuro.auth.SplashActivity"
             android:theme="@style/SplashTheme"
             android:exported="true">
             <intent-filter>
@@ -22,15 +22,43 @@
         </activity>
 
         <activity
-            android:name=".OnboardingActivity"
+            android:name="com.blazeneuro.auth.OnboardingActivity"
             android:exported="false" />
 
         <activity
-            android:name=".AuthActivity"
+            android:name="com.blazeneuro.auth.AuthActivity"
             android:exported="false" />
 
         <activity
-            android:name=".WebAuthActivity"
+            android:name="com.blazeneuro.auth.LoginActivity"
+            android:exported="true"
+            android:launchMode="singleTop">
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+                <data android:scheme="blazeneuro" android:host="auth" />
+            </intent-filter>
+        </activity>
+
+        <activity
+            android:name="com.blazeneuro.auth.SignupActivity"
+            android:exported="true"
+            android:launchMode="singleTop">
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+                <data android:scheme="blazeneuro" android:host="auth" />
+            </intent-filter>
+        </activity>
+
+        <activity
+            android:name="com.blazeneuro.auth.VerifyEmailActivity"
+            android:exported="false" />
+
+        <activity
+            android:name="com.blazeneuro.auth.WebAuthActivity"
             android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.VIEW" />
@@ -41,7 +69,7 @@
         </activity>
 
         <activity
-            android:name=".HomeActivity"
+            android:name="com.blazeneuro.auth.HomeActivity"
             android:exported="false" />
 
     </application>
